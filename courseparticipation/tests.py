@@ -1,6 +1,7 @@
 import unittest
 
 from api.views import CourseList
+from api.generate_db_entries import DbEntriesCreation
 
 from django.core.wsgi import get_wsgi_application
 import os
@@ -19,6 +20,7 @@ class TestApi(APITestCase):
 
     def test_course_list(self):
         view = CourseList.as_view()
+        user_creation = DbEntriesCreation.create_user_admin()
         factory = APIRequestFactory()
         request = factory.get('/courses/')
         response = view(request)
