@@ -1,6 +1,6 @@
 import unittest
 
-from api.views import CourseList
+from api.views import CourseList, UserList
 from api.generate_db_entries import DbEntriesCreation
 
 from django.contrib.auth.models import User
@@ -29,7 +29,28 @@ class TestApi(APITestCase):
         factory = APIRequestFactory()
         request = factory.get('/courses/')
         response = view(request)
+        #print(dir(response))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_creation_admin(self):
+        view = UserList.as_view()
+        DbEntriesCreation().create_user_admin()
+        factory = APIRequestFactory()
+        request = factory.get('/users/')
+        response = view(request)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['username'], 'admin')
+
+    def test_user_creation_10_users_list(self):
+        view = UserList.as_view()
+        DbEntriesCreation().create_user_examples(10)
+        #user_entries = User.objects.all()
+        #print(user_entries.order_by("-date_joined").values())
+        factory = APIRequestFactory()
+        request = factory.get('/users/')
+        response = view(request)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['username'], 'user_0')
 
 if __name__ == '__main__':
     unittest.main()

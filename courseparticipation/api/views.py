@@ -11,14 +11,13 @@ if not settings.configured:
 from api.models import Course
 from rest_framework import generics, status
 
-from api.serializers import CourseSerializer
+from api.serializers import CourseSerializer, UserSerializer
 from api.generate_db_entries import DbEntriesCreation
 
 # https://www.django-rest-framework.org/tutorial/2-requests-and-responses/
 from rest_framework.response import Response
 
-import os
-import inspect
+from django.contrib.auth.models import User
 
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
@@ -36,4 +35,13 @@ class CourseList(generics.ListCreateAPIView):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
-    # TODO: create test in TestApi.py
+
+# Add classes for the User models defined in django.contrib.auth.models
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
