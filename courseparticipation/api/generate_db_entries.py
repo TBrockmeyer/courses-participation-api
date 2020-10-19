@@ -21,7 +21,7 @@ class DbEntriesCreation:
         try:
             self.user_creation = self.create_user('test_admin', 'test_admin', True, True)
         except:
-            pass
+            print("User 'admin' already exists.")
 
     def create_user_examples(self, number_examples):
         self.user_examples_usernames = ["user_"+str(i) for i in range (0,number_examples)]
@@ -30,4 +30,4 @@ class DbEntriesCreation:
             try:
                 self.create_user(self.user_examples_usernames[j], self.user_examples_passwords[j], False, False)
             except:
-                pass
+                print("User " + self.user_examples_usernames[j] + " already exists.")
