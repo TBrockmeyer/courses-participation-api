@@ -43,14 +43,14 @@ class TestApi(APITestCase):
 
     def test_user_creation_10_users_list(self):
         view = UserList.as_view()
-        DbEntriesCreation().create_user_examples(10)
-        #user_entries = User.objects.all()
-        #print(user_entries.order_by("-date_joined").values())
+        number_users = 10
+        DbEntriesCreation().create_user_examples(number_users)
         factory = APIRequestFactory()
         request = factory.get('/users/')
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]['username'], 'user_0')
+        for i in range (0, number_users):
+            self.assertEqual(response.data[i]['username'], 'user_'+str(i))
 
 if __name__ == '__main__':
     unittest.main()
