@@ -18,7 +18,10 @@ class DbEntriesCreation:
         self.user.save()
 
     def create_user_admin(self):
-        self.user_creation = self.create_user('admin', 'admin', True, True)
+        try:
+            self.user_creation = self.create_user('test_admin', 'test_admin', True, True)
+        except:
+            pass
 
     def create_user_examples(self, number_examples):
         self.user_examples_usernames = ["user_"+str(i) for i in range (0,number_examples)]
