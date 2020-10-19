@@ -20,18 +20,15 @@ from rest_framework.test import APIRequestFactory, APITestCase
 
 class TestApi(APITestCase):
 
+    # Test scope: displaying courses list
     def test_course_list(self):
         view = CourseList.as_view()
-        #DbEntriesCreation().create_user_admin()
-        #DbEntriesCreation().create_user_examples(10)
-        #user_entries = User.objects.all()
-        #print(user_entries.order_by("-date_joined").values())
         factory = APIRequestFactory()
         request = factory.get('/courses/')
         response = view(request)
-        #print(dir(response))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    # Test scope: creating users
     def test_user_creation_admin(self):
         view = UserList.as_view()
         DbEntriesCreation().create_user_admin()
