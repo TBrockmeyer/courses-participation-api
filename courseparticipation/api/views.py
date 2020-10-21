@@ -22,7 +22,7 @@ from django.contrib.auth.models import User
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAdminUser]
 
     def perform_create(self, serializer):
         # Owner can be defined e.g. through serializer.save(owner=self.request.user)
