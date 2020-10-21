@@ -17,9 +17,9 @@ class DbEntriesCreation:
         self.user.is_staff=is_staff
         self.user.save()
 
-    def create_user_admin(self):
+    def create_user_admin(self, username, password):
         try:
-            self.user_creation = self.create_user('test_admin', 'test_admin', True, True)
+            self.create_user('test_admin', 'test_admin', True, True)
         except:
             print("User 'admin' already exists.")
 
