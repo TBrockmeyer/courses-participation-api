@@ -9,7 +9,7 @@ if not settings.configured:
     settings.configure()
 
 from api.models import Course
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 
 from api.serializers import CourseSerializer, UserSerializer
 from api.generate_db_entries import DbEntriesCreation
@@ -19,12 +19,10 @@ from rest_framework.response import Response
 
 from django.contrib.auth.models import User
 
-from api.permissions import IsAdminOrReadOnly
-
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [permissions.IsAdminUser]
 
     def perform_create(self, serializer):
         # Owner can be defined e.g. through serializer.save(owner=self.request.user)
