@@ -26,6 +26,12 @@ class TestApi(APITestCase):
         DbEntriesCreation().create_user_admin(auth_username_admin, auth_password_admin)
         return User.objects.get(username=auth_username_admin)
 
+    def auth_test_user(self):
+        auth_username_user = "test_user"
+        auth_password_user = "test_user"
+        DbEntriesCreation().create_user(auth_username_user, auth_password_user, False, False)
+        return User.objects.get(username=auth_username_user)
+
     # Test scope: displaying courses list
     def test_course_list(self):
         view = CourseList.as_view()
@@ -64,7 +70,12 @@ class TestApi(APITestCase):
         request = factory.post('/courses/', {'course_title': 'Test Course'})
         force_authenticate(request, user=self.auth_test_admin())
         response = view(request)
+        # Course creation by admin should get status code 201
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # Course creation by any other user should get a 403 error (as defined in exceptions.py of rest_framework)
+        force_authenticate(request, user=self.auth_test_user())
+        response = view(request)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 if __name__ == '__main__':
