@@ -8,10 +8,10 @@ from django.conf import settings
 if not settings.configured:
     settings.configure()
 
-from api.models import Course
+from api.models import Course, Participation
 from rest_framework import generics, status
 
-from api.serializers import CourseSerializer, UserSerializer
+from api.serializers import CourseSerializer, UserSerializer, ParticipationSerializer
 from api.generate_db_entries import DbEntriesCreation
 
 # https://www.django-rest-framework.org/tutorial/2-requests-and-responses/
@@ -47,3 +47,16 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class ParticipationList(generics.ListCreateAPIView):
+    queryset = Participation.objects.all()
+    serializer_class = ParticipationSerializer
+    permission_classes = [IsOwnerOrAdmin]
+
+    def perform_create(self, serializer):
+        serializer.save(user_id=self.request.user.id)
+
+    # TODO: Ensure that
+    ## -- authenticated users can (un)subscribe ONLY themselves to (from) exactly one course
+    ## -- admins can (un)subscribe authenticated users to (from) exactly one course
