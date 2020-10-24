@@ -19,7 +19,7 @@ from rest_framework.response import Response
 
 from django.contrib.auth.models import User
 
-from api.permissions import IsAdminOrReadOnly
+from api.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
 
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
