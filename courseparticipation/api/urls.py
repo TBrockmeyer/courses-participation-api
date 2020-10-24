@@ -7,6 +7,7 @@ urlpatterns = [
     path('courses/', views.CourseList.as_view()),
     path('users/', views.UserList.as_view()),
     path('users/<int:pk>/', views.UserDetail.as_view()),
+    path('participations/', views.ParticipationList.as_view()),
 ]
 
 urlpatterns += [
