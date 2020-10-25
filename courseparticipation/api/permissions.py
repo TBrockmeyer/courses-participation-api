@@ -28,6 +28,9 @@ class IsOwnerOrAdmin(permissions.BasePermission):
         return True
     """
 
+    def has_permission(self, request, view):
+        return True
+
     def has_object_permission(self, request, view, obj):
         # (Read and write) permissions are only allowed to admins and the owner of the participation.
         if (obj.participation_user_id == request.user or request.user.is_staff):
