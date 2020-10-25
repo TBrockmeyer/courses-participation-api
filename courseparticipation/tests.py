@@ -1,6 +1,8 @@
 import unittest
 
-from api.views import CourseList, UserList
+from api.views import CourseList, UserList, CourseList, ParticipationList
+from api.models import Course
+
 from api.generate_db_entries import DbEntriesCreation
 
 from django.contrib.auth.models import User
@@ -32,6 +34,21 @@ class TestApi(APITestCase):
         DbEntriesCreation().create_user(auth_username_user, auth_password_user, False, False)
         return User.objects.get(username=auth_username_user)
 
+    def create_test_course_response(self, user, course_title):
+        view = CourseList.as_view()
+        factory = APIRequestFactory()
+        request = factory.post('/courses/', {'course_title': course_title})
+        force_authenticate(request, user=user)
+        return view(request)
+
+    def create_test_participation_response(self, user, participation_course_id):
+        view = ParticipationList.as_view()
+        factory = APIRequestFactory()
+        request = factory.post('/participations/', {'participation_course_id': participation_course_id})
+        force_authenticate(request, user=user)
+        return view(request)
+
+    # Test methods:
     # Test scope: displaying courses list
     def test_course_list(self):
         view = CourseList.as_view()
@@ -65,17 +82,21 @@ class TestApi(APITestCase):
     # Test scope: user permissions
     ## Only allow admins to create courses
     def test_permission_course_creation(self):
-        view = CourseList.as_view()
-        factory = APIRequestFactory()
-        request = factory.post('/courses/', {'course_title': 'Test Course'})
-        force_authenticate(request, user=self.auth_test_admin())
-        response = view(request)
         # Course creation by admin should get status code 201
+        response = self.create_test_course_response(self.auth_test_admin(), 'Test Course Permission')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # Course creation by any other user should get a 403 error (as defined in exceptions.py of rest_framework)
-        force_authenticate(request, user=self.auth_test_user())
-        response = view(request)
+        response = self.create_test_course_response(self.auth_test_user(), 'Test Course Permission')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # Test scope: participations
+    ## Only allow users or admins to create course participations
+    def test_permission_participation_creation(self):
+        # Create test course as reference
+        response_course_creation = self.create_test_course_response(self.auth_test_admin(), 'Test Course Participation')
+        # Participation creation by test user should get status code 201
+        response = self.create_test_participation_response(self.auth_test_user(), response_course_creation.data['course_id'])
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
 
 if __name__ == '__main__':
