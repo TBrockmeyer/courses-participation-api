@@ -54,13 +54,13 @@ class TestApi(APITestCase):
         view = UserList.as_view()
         number_users = 10
         DbEntriesCreation().create_user_examples(number_users)
-        user_objects_list = list(User.objects.filter(username__startswith="user_").all().values())
+        user_objects_list = list(User.objects.filter(username__startswith="test_user_").all().values())
         factory = APIRequestFactory()
         request = factory.get('/users/')
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for i in range (0, number_users):
-            self.assertEqual(user_objects_list[i]['username'], 'user_'+str(i))
+            self.assertEqual(user_objects_list[i]['username'], 'test_user_'+str(i))
 
     # Test scope: user permissions
     ## Only allow admins to create courses

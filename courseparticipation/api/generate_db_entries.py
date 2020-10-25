@@ -24,8 +24,8 @@ class DbEntriesCreation:
             print("User 'admin' already exists.")
 
     def create_user_examples(self, number_examples):
-        self.user_examples_usernames = ["user_"+str(i) for i in range (0,number_examples)]
-        self.user_examples_passwords = ["user"+str(i)+"_pw" for i in range (0,number_examples)]
+        self.user_examples_usernames = ["test_user_"+str(i) for i in range (0,number_examples)]
+        self.user_examples_passwords = ["test_user"+str(i)+"_pw" for i in range (0,number_examples)]
         for j in range (0, number_examples):
             try:
                 self.create_user(self.user_examples_usernames[j], self.user_examples_passwords[j], False, False)
