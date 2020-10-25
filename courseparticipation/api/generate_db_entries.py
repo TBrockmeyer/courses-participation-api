@@ -11,17 +11,23 @@ if not settings.configured:
 from django.contrib.auth.models import User
 
 class DbEntriesCreation:
+    def __init__(self):
+        self.test_admin_username = 'test_admin'
+        self.test_admin_password = 'test_admin_pw'
+
     def create_user(self, username, password, is_superuser, is_staff):
         self.user=User.objects.create_user(username, password=password)
         self.user.is_superuser=is_superuser
         self.user.is_staff=is_staff
         self.user.save()
 
-    def create_user_admin(self, username, password):
+    def create_user_admin(self, username=None, password=None):
+        username = self.test_admin_username if username==None else username
+        password = self.test_admin_password if password==None else password
         try:
-            self.create_user('test_admin', 'test_admin', True, True)
+            self.create_user(username, password, True, True)
         except:
-            print("User 'admin' already exists.")
+            print("User " + username + " already exists.")
 
     def create_user_examples(self, number_examples):
         self.user_examples_usernames = ["test_user_"+str(i) for i in range (0,number_examples)]
@@ -31,3 +37,4 @@ class DbEntriesCreation:
                 self.create_user(self.user_examples_usernames[j], self.user_examples_passwords[j], False, False)
             except:
                 print("User " + self.user_examples_usernames[j] + " already exists.")
+
