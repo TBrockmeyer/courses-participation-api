@@ -12,7 +12,7 @@ class Course(models.Model):
 class Participation(models.Model):
     participation_id = models.AutoField(unique=True, primary_key=True)
     participation_course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
-    user = models.ForeignKey('auth.User', unique=True, on_delete=models.CASCADE)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         super(Participation, self).save(*args, **kwargs)
