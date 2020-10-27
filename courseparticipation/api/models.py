@@ -12,6 +12,7 @@ class Course(models.Model):
 class Participation(models.Model):
     participation_id = models.AutoField(unique=True, primary_key=True)
     participation_course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
+    participation_course_phase = models.IntegerField(default=0)
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):

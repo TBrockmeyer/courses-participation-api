@@ -7,7 +7,7 @@ class ParticipationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Participation
-        fields = ['participation_id', 'participation_course_id', 'user_id']
+        fields = ['participation_id', 'participation_course_id', 'participation_course_phase', 'user_id']
 
 
 class CourseSerializer(serializers.ModelSerializer):
