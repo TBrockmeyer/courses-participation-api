@@ -55,43 +55,8 @@ class ParticipationList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     def perform_create(self, serializer):
-        # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
+        serializer.save(user_id=self.request.user.id)
 
-        # TODO: If user is admin, check if relevant user id is given. Else, throw error.
-        # TODO: If no participation exists for user, create participation
-        # TODO critical: go through the case that a user_id is far outside the max!
-        if ('user_id' in self.request.data):
-            serializer.save(user_id=int(self.request.data['user_id']))
-        else:
-            serializer.save(user_id=self.request.user.id)
-
-class ParticipationUpdate(generics.RetrieveUpdateAPIView):
-    queryset = Participation.objects.all()
-    serializer_class = ParticipationSerializer
-    permission_classes = [IsOwnerOrAdmin]
-
-    def perform_create(self, serializer):
-        # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-
-        # TODO: If user is admin, check if relevant user id is given. Else, throw error.
-        # TODO: If no participation exists for user, create participation
-        participation_object = Participation.objects.filter(user_id=self.request.user.id)
-        #serializer.save(user_id=self.request.user.id)
-        serializer.save(user_id=int(self.request.data['user_id']))
-
-        # TODO: If requested course is the same as before, and user requests to do an allowed switch of phases:
-        ## Delete existing Participation database entry
-        ## Create new Participation entry with new phase information
-
-        # TODO: If user attempts to switch course without having deleted an existing Participation before, throw error:
-        ## Appropriate error to remind user to exit their other course first
-        ## Optional: printed error message why the request was denied
-
-
-class ParticipationDeletion(generics.RetrieveUpdateAPIView):
-    queryset = Participation.objects.all()
-    serializer_class = ParticipationSerializer
-    permission_classes = [IsOwnerOrAdmin]
-
-    def perform_create(self, serializer):
-        Participation.objects.filter(user_id=self.request.user.id).delete()
+    # TODO: Ensure that
+    ## -- authenticated users can (un)subscribe ONLY themselves to (from) exactly one course
+    ## -- admins can (un)subscribe authenticated users to (from) exactly one course
