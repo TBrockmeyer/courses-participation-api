@@ -55,8 +55,12 @@ class ParticipationList(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     def perform_create(self, serializer):
-        serializer.save(user_id=self.request.user.id)
-
-    # TODO: Ensure that
-    ## -- authenticated users can (un)subscribe ONLY themselves to (from) exactly one course
-    ## -- admins can (un)subscribe authenticated users to (from) exactly one course
+        # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
+        # TODO: ensure that a participation_course_phase is within the available range of phases
+        # TODO: ensure that a participation_course_phase cannot be given when the user isn't yet in the Course
+        # TODO: ensure that a Participation cannot be created if a user has any Participation
+        # (needs to unsubscribe there / or indicate new phase if already in Course)
+        if ('user_id' in self.request.data):
+            serializer.save(user_id=int(self.request.data['user_id']))
+        else:
+            serializer.save(user_id=self.request.user.id)
