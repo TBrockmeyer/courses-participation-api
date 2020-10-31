@@ -49,7 +49,7 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 
 
-class ParticipationList(generics.ListCreateAPIView):
+class ParticipationUpdate(generics.CreateAPIView):
     queryset = Participation.objects.all()
     serializer_class = ParticipationSerializer
     permission_classes = [IsOwnerOrAdmin]
@@ -64,3 +64,9 @@ class ParticipationList(generics.ListCreateAPIView):
             serializer.save(user_id=int(self.request.data['user_id']))
         else:
             serializer.save(user_id=self.request.user.id)
+
+
+class ParticipationList(generics.ListAPIView):
+    queryset = Participation.objects.all()
+    serializer_class = ParticipationSerializer
+    permission_classes = [IsOwnerOrAdmin]

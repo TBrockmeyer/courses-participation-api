@@ -8,6 +8,8 @@ urlpatterns = [
     path('users/', views.UserList.as_view()),
     path('users/<int:pk>/', views.UserDetail.as_view()),
     path('participations/', views.ParticipationList.as_view()),
+    path('participations/update/', views.ParticipationUpdate.as_view()),
+    #path('participations/delete/<int:pk>/', views.ParticipationDeletion.as_view()),
 ]
 
 urlpatterns += [
