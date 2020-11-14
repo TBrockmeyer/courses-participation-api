@@ -60,10 +60,19 @@ class ParticipationUpdate(generics.CreateAPIView):
         # TODO: ensure that a participation_course_phase cannot be given when the user isn't yet in the Course
         # TODO: ensure that a Participation cannot be created if a user has any Participation
         # (needs to unsubscribe there / or indicate new phase if already in Course)
+        """
+        Check given user_id: does have existing participation?
+        ├─ No ► Create new participation with requested user_id, course_id and course_phase
+        └─ Yes ► Is requested course_phase same as that of existing participation?
+            ├─ No ► Refuse request with error  and inform in response that old participation needs to be deleted first
+            └─ Yes ► Is requested course_phase adjoining step to that of existing participation?
+                ├─ No ► Refuse request with error  and inform in response that only jumps to adjoining phases allowed
+                └─ Yes ► update info in database by saving data from request through serializer
+        """
+        relevant_user_id = self.request.user.id
         if ('user_id' in self.request.data):
-            serializer.save(user_id=int(self.request.data['user_id']))
-        else:
-            serializer.save(user_id=self.request.user.id)
+            relevant_user_id=int(self.request.data['user_id'])
+        serializer.save(user_id=relevant_user_id)
 
 
 class ParticipationList(generics.ListAPIView):
