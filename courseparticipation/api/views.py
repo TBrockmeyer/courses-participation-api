@@ -75,6 +75,25 @@ class ParticipationUpdate(generics.CreateAPIView):
         serializer.save(user_id=relevant_user_id)
 
 
+class ParticipationDeletion(generics.DestroyAPIView):
+    queryset = Participation.objects.all()
+    serializer_class = ParticipationSerializer
+    permission_classes = [IsOwnerOrAdmin]
+
+    def perform_destroy(self, instance):
+        # Users call this endpoint indicating a participation_course_id.
+        # TODO: ensure that a Participation cannot be deleted when the user isn't in the Course
+        # TODO: ensure that a Participation cannot be deleted if a user does not have any Participation
+        """
+        Check given user_id: does have existing participation?
+        ├─ No ► Refuse request with error
+        └─ Yes ► Is requested course_id same as that of existing participation?
+            ├─ No ► Refuse request with error  and inform in response that course_id of existing participation needs to be given
+            └─ Yes ► Update info in database by deleting Participation from request
+        """
+        instance.delete()
+
+
 class ParticipationList(generics.ListAPIView):
     queryset = Participation.objects.all()
     serializer_class = ParticipationSerializer
