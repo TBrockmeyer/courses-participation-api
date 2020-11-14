@@ -1,6 +1,6 @@
 import unittest
 
-from api.views import CourseList, UserList, CourseList, ParticipationList
+from api.views import CourseList, UserList, CourseList, ParticipationUpdate
 from api.models import Course
 
 from api.generate_db_entries import DbEntriesCreation
@@ -42,9 +42,9 @@ class TestApi(APITestCase):
         return view(request)
 
     def create_test_participation_response(self, user, participation_course_id):
-        view = ParticipationList.as_view()
+        view = ParticipationUpdate.as_view()
         factory = APIRequestFactory()
-        request = factory.post('/participations/', {'participation_course_id': participation_course_id})
+        request = factory.post('/participations/update/', {'participation_course_id': participation_course_id})
         force_authenticate(request, user=user)
         return view(request)
 
