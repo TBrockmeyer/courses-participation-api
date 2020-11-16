@@ -9,7 +9,7 @@ urlpatterns = [
     path('users/<int:pk>/', views.UserDetail.as_view()),
     path('participations/', views.ParticipationList.as_view()),
     path('participations/create/', views.ParticipationCreation.as_view()),
-    path('participations/update/', views.ParticipationCreation.as_view()),
+    path('participations/update/<int:pk>/', views.ParticipationUpdate.as_view()),
     path('participations/delete/<int:pk>/', views.ParticipationDeletion.as_view()),
 ]
 
