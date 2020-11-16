@@ -93,6 +93,11 @@ class ParticipationUpdate(generics.UpdateAPIView):
     serializer_class = ParticipationSerializer
     permission_classes = [IsOwnerOrAdmin]
 
+    # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
+    # TODO: ensure that a participation_course_phase is within the available range of phases
+    # TODO: ensure that only the participation_course_phase can be updated (not the participation_course_id).
+    # For switching participation_course_id, old participation needs to be deleted and a new one created.
+
 
 class ParticipationDeletion(generics.DestroyAPIView):
     queryset = Participation.objects.all()
@@ -117,3 +122,6 @@ class ParticipationList(generics.ListAPIView):
     queryset = Participation.objects.all()
     serializer_class = ParticipationSerializer
     permission_classes = [IsOwnerOrAdmin]
+
+    # TODO: ensure that list only shows participations relevant to authenticated user
+    # TODO: write separate endpoint to provide primary key of participation
