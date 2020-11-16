@@ -22,14 +22,14 @@ class IsOwnerOrAdmin(permissions.BasePermission):
     """
     def has_permission(self, request, view):
         # Grant permission only to authenticated users
-        if(request.user.is_authenticated):
+        if (request.user.is_authenticated):
             # If requesting user is an admin, view and creation permissions are conceded
-            if(request.user.is_staff):
+            if (request.user.is_staff):
                 return True
             # If a user_id is given by a non-admin user as an argument in the request,
             # it needs to be the user's own ID
             if ('user_id' in request.data):
-                if(int(request.data['user_id']) == request.user.id):
+                if (int(request.data['user_id']) == request.user.id):
                     return True
                 else:
                     return False
