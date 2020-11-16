@@ -85,6 +85,12 @@ class ParticipationCreation(generics.CreateAPIView):
         serializer.save(user_id=relevant_user_id)
 
 
+class ParticipationUpdate(generics.UpdateAPIView):
+    queryset = Participation.objects.all()
+    serializer_class = ParticipationSerializer
+    permission_classes = [IsOwnerOrAdmin]
+
+
 class ParticipationDeletion(generics.DestroyAPIView):
     queryset = Participation.objects.all()
     serializer_class = ParticipationSerializer
