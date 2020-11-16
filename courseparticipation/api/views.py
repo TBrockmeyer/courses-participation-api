@@ -49,7 +49,7 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 
 
-class ParticipationUpdate(generics.CreateAPIView):
+class ParticipationCreation(generics.CreateAPIView):
     queryset = Participation.objects.all()
     serializer_class = ParticipationSerializer
     permission_classes = [IsOwnerOrAdmin]
