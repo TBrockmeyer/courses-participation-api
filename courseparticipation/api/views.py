@@ -67,10 +67,16 @@ class ParticipationCreation(generics.CreateAPIView):
             ├─ No ► Refuse request with error  and inform in response that only jumps to adjoining phases allowed
             └─ Yes ► update info in database by saving data from request through serializer
     """
+    def get_relevant_user_id(self):
+        relevant_user_id = self.request.user.id
+        if ('user_id' in self.request.data):
+            relevant_user_id=int(self.request.data['user_id'])
+        return relevant_user_id
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        existing_participation = Participation.objects.filter(user_id=int(self.request.data['user_id']))
+        existing_participation = Participation.objects.filter(user_id=self.get_relevant_user_id())
         if (existing_participation.count() > 0):
             message = "A Participation for this user_id already exists. Delete unwanted participation first through /delete/<int:pk> endpoint."
             raise exceptions.ValidationError(detail=message)
@@ -79,10 +85,7 @@ class ParticipationCreation(generics.CreateAPIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
-        relevant_user_id = self.request.user.id
-        if ('user_id' in self.request.data):
-            relevant_user_id=int(self.request.data['user_id'])
-        serializer.save(user_id=relevant_user_id)
+        serializer.save(user_id=self.get_relevant_user_id())
 
 
 class ParticipationUpdate(generics.UpdateAPIView):
