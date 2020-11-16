@@ -98,6 +98,8 @@ class TestApi(APITestCase):
         response = self.create_test_participation_response(self.auth_test_user(), response_course_creation.data['course_id'])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    # TODO: write test for new participation creation and update endpoints
+
 
 if __name__ == '__main__':
     unittest.main()
