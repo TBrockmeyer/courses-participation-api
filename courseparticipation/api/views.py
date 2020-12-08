@@ -21,6 +21,8 @@ from django.contrib.auth.models import User
 
 from api.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
 
+from rest_framework.permissions import IsAdminUser
+
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
@@ -109,6 +111,35 @@ class ParticipationDeletion(generics.DestroyAPIView):
         """
         # Ensure that returned object belongs to requesting user
         queryset = Participation.objects.filter(user_id=request.user.id)
+
+        filter_kwargs = {}
+        obj = generics.get_object_or_404(queryset, **filter_kwargs)
+
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
+    """
+    Destroy a model instance. (Overridden from rest_framework/mixins.py)
+    """
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object(self.request)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ParticipationDeletionByAdmin(generics.DestroyAPIView):
+    queryset = Participation.objects.all()
+    serializer_class = ParticipationSerializer
+    permission_classes = [IsAdminUser]
+
+    def get_object(self, request):
+        """
+        Returns the object the view is displaying.
+        """
+        # Ensure that returned object belongs to requesting user
+        queryset = Participation.objects.filter(user_id=request.data['user_id'])
 
         filter_kwargs = {}
         obj = generics.get_object_or_404(queryset, **filter_kwargs)
