@@ -28,6 +28,8 @@ class CourseList(generics.ListCreateAPIView):
     serializer_class = CourseSerializer
     permission_classes = [IsAdminOrReadOnly]
 
+    # TODO: add timer field to courses and update it depending on users entering the course / the lobby phase
+
     def perform_create(self, serializer):
         # Owner can be defined e.g. through serializer.save(owner=self.request.user)
         serializer.save()
