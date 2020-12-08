@@ -111,7 +111,7 @@ class ParticipationDeletion(generics.DestroyAPIView):
         Check given user_id: does have existing participation?
         ├─ No ► Refuse request with error
         └─ Yes ► Is requested course_id same as that of existing participation?
-            ├─ No ► Refuse request with error  and inform in response that course_id of existing participation needs to be given
+            ├─ No ► Refuse request with error and inform in response that course_id of existing participation needs to be given
             └─ Yes ► Update info in database by deleting Participation from request
         """
         instance.delete()
@@ -128,6 +128,7 @@ class ParticipationList(generics.ListAPIView):
     """
     List a queryset.
     """
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -137,7 +138,8 @@ class ParticipationList(generics.ListAPIView):
             return self.get_paginated_response(serializer.data)
 
         requesting_user_id = list(User.objects.filter(username=request.user).values())[0]['id']
-        queryset = queryset.filter(user_id=requesting_user_id)
+        if(not request.user.is_superuser or not request.user.is_staff):
+            queryset = queryset.filter(user_id=requesting_user_id)
 
         serializer = self.get_serializer(queryset, many=True)
 
