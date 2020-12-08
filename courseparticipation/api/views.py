@@ -63,7 +63,7 @@ class ParticipationCreation(generics.CreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: ensure that a participation_course_phase is within the available range of phases
+    # TODO: ensure that the Course objects are aware of their participations (e.g. through dicts or json)
     # (needs to unsubscribe there / or indicate new phase if already in Course)
     """
     Check given user_id: does have existing participation?
@@ -84,9 +84,26 @@ class ParticipationCreation(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         existing_participation = Participation.objects.filter(user_id=self.get_relevant_user_id())
+
+        # Ensure that only one participation can exist per user
         if (existing_participation.count() > 0):
             message = "A Participation for this user_id already exists. Delete unwanted participation first by calling participations/delete/."
             raise exceptions.ValidationError(detail=message)
+
+        # Ensure that the requested course phase is within the range of available course phases
+        requested_course = Course.objects.filter(course_id=request.data['participation_course_id'])
+        requested_course_phases = eval(requested_course.values()[0]['course_phases'])
+        message_valid_course_phases = ""
+        for i in range(0, len(requested_course_phases)):
+            message_valid_course_phases += str(i) + ": '" + requested_course_phases[i] + ("', " if i != len(requested_course_phases)-1 else "'. ")
+        message_course_phase_invalid_value = "The requested course phase is not one of the available phases: " + \
+            message_valid_course_phases + \
+            "Provide one of the integer numbers, e.g. participation_course_phase=0 for phase " + \
+            "'" + requested_course_phases[0] + "'"
+        if (int(request.data['participation_course_phase']) not in [p for p in range(0, len(requested_course_phases))]):
+            raise exceptions.ValidationError(detail=message_course_phase_invalid_value)
+
+        # Create the participation
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
