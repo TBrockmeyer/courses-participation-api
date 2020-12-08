@@ -65,6 +65,7 @@ class ParticipationCreation(generics.CreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
+    # TODO: adapt tests (Course creation tests) to new field "course_phases"
     # TODO: ensure that the Course objects are aware of their participations (e.g. through dicts or json)
     # (needs to unsubscribe there / or indicate new phase if already in Course)
     """
