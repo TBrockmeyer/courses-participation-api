@@ -1,6 +1,6 @@
 import unittest
 
-from api.views import CourseList, UserList, CourseList, ParticipationCreation
+from api.views import CourseList, UserList, CourseList, ParticipationCreation, ParticipationList
 from api.models import Course
 
 from api.generate_db_entries import DbEntriesCreation
@@ -45,6 +45,13 @@ class TestApi(APITestCase):
         view = ParticipationCreation.as_view()
         factory = APIRequestFactory()
         request = factory.post('/participations/update/', {'participation_course_id': participation_course_id})
+        force_authenticate(request, user=user)
+        return view(request)
+
+    def get_test_participation_response(self, user):
+        view = ParticipationList.as_view()
+        factory = APIRequestFactory()
+        request = factory.get('/participations/')
         force_authenticate(request, user=user)
         return view(request)
 
@@ -98,7 +105,19 @@ class TestApi(APITestCase):
         response = self.create_test_participation_response(self.auth_test_user(), response_course_creation.data['course_id'])
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    # TODO: write test for new participation creation and update endpoints
+    def test_permission_participation_view(self):
+        # Create test course as reference
+        response_course_creation = self.create_test_course_response(self.auth_test_admin(), 'Test Course Participation')
+        # Create test user
+        test_user = self.auth_test_user()
+        # Create test participation
+        self.create_test_participation_response(test_user, response_course_creation.data['course_id'])
+        # Get participation view response
+        response = self.get_test_participation_response(test_user)
+        # Participation view response by test user should only show one participation
+        self.assertEqual(len(response.data), 1)
+        # Participation view response by test user should only show participation of this user
+        self.assertEqual(response.data[0]['user_id'], test_user.id)
 
 
 if __name__ == '__main__':
