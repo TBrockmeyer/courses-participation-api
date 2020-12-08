@@ -1,9 +1,30 @@
 # courses-participation-api
+Simple web API for managing course participations, according to these rough requirements:
+
+## For admins:
+- allow course creation
+- allow user management (user creation, kicking users from courses...)
+
+## For users:
+- allow entering and exiting courses
+- allow visibility of participation in courses
 
 # How to learn how to create web APIs
 Follow the web API tutorial on the Website of the Django Rest Framework.<br/>Start with Step 1 here: https://www.django-rest-framework.org/tutorial/1-serialization/
 
 # How to use it
+## Set up your environment
+- clone the repo
+- cd into the folder "courseparticipation"
+- install required packages
+<br/>`pip install django`
+pip install djangorestframework`
+- in a first terminal, cd into the parent folder of "courseparticipation" and do
+<br/>`python manage.py runserver`
+- in a second terminal, try out the commands below to interact with the API
+- if any requirement is missing, check out this link and follow the first steps until you have a running minimalistic API. Then use a similar configuration to run this API.
+<br/>https://www.django-rest-framework.org/tutorial/1-serialization/
+
 ## For admins
 Create Courses
 <br/>`http -a admin:admin POST http://127.0.0.1:8000/courses/ course_title="Course 7" course_phases="['Lobby', 'Welcome', 'Warmup']"`
