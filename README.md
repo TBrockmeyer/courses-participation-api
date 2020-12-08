@@ -1,6 +1,6 @@
 # courses-participation-api
 
-# How to create it
+# How to learn how to create web APIs
 Follow the web API tutorial on the Website of the Django Rest Framework.<br/>Start with Step 1 here: https://www.django-rest-framework.org/tutorial/1-serialization/
 
 # How to use it
