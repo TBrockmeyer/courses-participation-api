@@ -17,7 +17,7 @@ Follow the web API tutorial on the Website of the Django Rest Framework.<br/>Sta
 - clone the repo
 - cd into the folder "courseparticipation"
 - install required packages
-<br/>`pip install django`
+<br/>`pip install django
 pip install djangorestframework`
 - in a first terminal, cd into the parent folder of "courseparticipation" and do
 <br/>`python manage.py runserver`
