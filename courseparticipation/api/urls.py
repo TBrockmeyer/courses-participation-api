@@ -10,7 +10,7 @@ urlpatterns = [
     path('participations/', views.ParticipationList.as_view()),
     path('participations/create/', views.ParticipationCreation.as_view()),
     path('participations/update/<int:pk>/', views.ParticipationUpdate.as_view()),
-    path('participations/delete/<int:pk>/', views.ParticipationDeletion.as_view()),
+    path('participations/delete/', views.ParticipationDeletion.as_view()),
 ]
 
 urlpatterns += [

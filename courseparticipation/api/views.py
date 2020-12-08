@@ -77,7 +77,7 @@ class ParticipationCreation(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         existing_participation = Participation.objects.filter(user_id=self.get_relevant_user_id())
         if (existing_participation.count() > 0):
-            message = "A Participation for this user_id already exists. Delete unwanted participation first through /delete/<int:pk> endpoint."
+            message = "A Participation for this user_id already exists. Delete unwanted participation first by calling participations/delete/."
             raise exceptions.ValidationError(detail=message)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -103,18 +103,28 @@ class ParticipationDeletion(generics.DestroyAPIView):
     serializer_class = ParticipationSerializer
     permission_classes = [IsOwnerOrAdmin]
 
-    def perform_destroy(self, instance):
-        # Users call this endpoint indicating a participation_course_id.
-        # TODO: ensure that a Participation cannot be deleted when the user isn't in the Course
-        # TODO: ensure that a Participation cannot be deleted if a user does not have any Participation
+    def get_object(self, request):
         """
-        Check given user_id: does have existing participation?
-        ├─ No ► Refuse request with error
-        └─ Yes ► Is requested course_id same as that of existing participation?
-            ├─ No ► Refuse request with error and inform in response that course_id of existing participation needs to be given
-            └─ Yes ► Update info in database by deleting Participation from request
+        Returns the object the view is displaying.
         """
-        instance.delete()
+        # Ensure that returned object belongs to requesting user
+        queryset = Participation.objects.filter(user_id=request.user.id)
+
+        filter_kwargs = {}
+        obj = generics.get_object_or_404(queryset, **filter_kwargs)
+
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
+    """
+    Destroy a model instance. (Overridden from rest_framework/mixins.py)
+    """
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object(self.request)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ParticipationList(generics.ListAPIView):
