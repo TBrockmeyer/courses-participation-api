@@ -56,7 +56,6 @@ class ParticipationCreation(generics.CreateAPIView):
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
     # TODO: ensure that a participation_course_phase is within the available range of phases
-    # TODO: ensure that a Participation cannot be created if a user has any Participation
     # (needs to unsubscribe there / or indicate new phase if already in Course)
     """
     Check given user_id: does have existing participation?
@@ -125,3 +124,28 @@ class ParticipationList(generics.ListAPIView):
 
     # TODO: ensure that list only shows participations relevant to authenticated user
     # TODO: write separate endpoint to provide primary key of participation
+
+    """
+    List a queryset.
+    """
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        requesting_user_id = list(User.objects.filter(username=request.user).values())[0]['id']
+        queryset = queryset.filter(user_id=requesting_user_id)
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)
+
+
+    """
+    Concrete view for listing a queryset.
+    """
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
