@@ -43,8 +43,6 @@ class IsOwnerOrAdmin(permissions.BasePermission):
     Custom permission to only allow owners of an object or admins to edit it.
     """
     def has_object_permission(self, request, view, obj):
-        # TODO: ensure that permissions allow only the user that created this participation (and the admin),
-        # but not other users to delete a participation
         if (obj.user_id == request.user.id or request.user.is_staff):
             return True
         else:
