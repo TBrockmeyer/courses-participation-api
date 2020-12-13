@@ -31,7 +31,7 @@ class CourseList(generics.ListCreateAPIView):
     # TODO: add timer field to courses and update it depending on users entering the course / the lobby phase
 
     def perform_create(self, serializer):
-        # Owner can be defined e.g. through serializer.save(owner=self.request.user)
+        # Owner may be defined e.g. through serializer.save(owner=self.request.user)
         serializer.save()
 
     def create(self, request, *args, **kwargs):
@@ -89,7 +89,7 @@ class ParticipationCreation(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         existing_participation = Participation.objects.filter(user_id=self.get_relevant_user_id())
 
-        # Ensure that only one participation can exist per user
+        # Ensure that only one participation may exist per user
         if (existing_participation.count() > 0):
             message = "A Participation for this user_id already exists. Delete unwanted participation first by calling participations/delete/."
             raise exceptions.ValidationError(detail=message)
