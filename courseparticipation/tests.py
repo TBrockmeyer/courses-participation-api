@@ -1,7 +1,7 @@
 import unittest
 
-from api.views import CourseList, UserList, CourseList, ParticipationCreation, ParticipationList
-from api.models import Course
+from api.views import CourseList, UserList, CourseList, ParticipationCreation, ParticipationList, ParticipationUpdate
+from api.models import Participation
 
 from api.generate_db_entries import DbEntriesCreation
 
@@ -37,14 +37,14 @@ class TestApi(APITestCase):
     def create_test_course_response(self, user, course_title, course_phases):
         view = CourseList.as_view()
         factory = APIRequestFactory()
-        request = factory.post('/courses/', {'course_title': course_title, 'course_phases': course_phases})
+        request = factory.post('', {'course_title': course_title, 'course_phases': course_phases})
         force_authenticate(request, user=user)
         return view(request)
 
     def create_test_participation_response(self, user, participation_course_id, participation_course_phase):
         view = ParticipationCreation.as_view()
         factory = APIRequestFactory()
-        request = factory.post('/participations/update/', {'participation_course_id': participation_course_id, 'participation_course_phase': participation_course_phase})
+        request = factory.post('', {'participation_course_id': participation_course_id, 'participation_course_phase': participation_course_phase})
         force_authenticate(request, user=user)
         return view(request)
 
@@ -57,6 +57,13 @@ class TestApi(APITestCase):
         request = factory.get('/participations/')
         force_authenticate(request, user=user)
         return view(request)
+
+    def create_test_participation_update_response(self, user, primary_key, participation_course_id, participation_course_phase):
+        view = ParticipationUpdate.as_view()
+        factory = APIRequestFactory()
+        request = factory.put('', {'participation_course_id': participation_course_id, 'participation_course_phase': participation_course_phase})
+        force_authenticate(request, user=user)
+        return view(request, pk=str(primary_key))
 
     # Test methods:
     # Test scope: displaying courses list
@@ -108,19 +115,41 @@ class TestApi(APITestCase):
         response = self.create_test_participation_response(self.auth_test_user(), response_course_creation.data['course_id'], 0)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    ## Only allow users or admins to view user-specific course participations
     def test_permission_participation_view(self):
         # Create test course as reference
         response_course_creation = self.create_test_course_response(self.auth_test_admin(), 'Test Course Participation', self.get_test_phases())
         # Create test user
         test_user = self.auth_test_user()
         # Create test participation
-        self.create_test_participation_response(test_user, response_course_creation.data['course_id'], 0)
+        response_participation_creation = self.create_test_participation_response(test_user, response_course_creation.data['course_id'], 4)
         # Get participation view response
         response = self.get_test_participation_response(test_user)
         # Participation view response by test user should only show one participation
         self.assertEqual(len(response.data), 1)
         # Participation view response by test user should only show participation of this user
         self.assertEqual(response.data[0]['user_id'], test_user.id)
+
+    # Only allow jumps between course phases in participation updates, but not jumps in courses
+    def test_participation_update(self):
+        # Create test user
+        test_admin = self.auth_test_admin()
+        # Create test course as reference
+        response_course_1_creation = self.create_test_course_response(test_admin, 'Test Course 1 Participation Update', self.get_test_phases())
+        response_course_2_creation = self.create_test_course_response(test_admin, 'Test Course 2 Participation Update', self.get_test_phases())
+        # Create test user
+        test_user = self.auth_test_user()
+        # Create test participation
+        response_participation_creation = self.create_test_participation_response(test_user,  response_course_1_creation.data['course_id'], 0)
+        # Participation update by test user should succeed if updating course phase only
+        response_a = self.create_test_participation_update_response(test_user, response_participation_creation.data['participation_id'], response_course_1_creation.data['course_id'], 1)
+        self.assertEqual(response_a.status_code, status.HTTP_200_OK)
+        # Participation update by test user should fail if updating course id
+        response_b = self.create_test_participation_update_response(test_user, response_participation_creation.data['participation_id'], response_course_2_creation.data['course_id'], 0)
+        self.assertEqual(response_b.status_code, status.HTTP_400_BAD_REQUEST)
+        # Participation update by test user should fail if updating course id and course phase
+        response_c = self.create_test_participation_update_response(test_user, response_participation_creation.data['participation_id'], response_course_2_creation.data['course_id'], 1)
+        self.assertEqual(response_c.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 if __name__ == '__main__':
