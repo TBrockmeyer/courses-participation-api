@@ -25,7 +25,7 @@ Simple web API for managing course participations, according to these rough requ
 
 ## Create users, courses and participations for testing the API
 ### Create admin user
-`
+```
 python manage.py shell
 >>> from django.contrib.auth.models import User
 >>> user=User.objects.create_user('admin', password='admin')
@@ -33,9 +33,9 @@ python manage.py shell
 >>> user.is_staff=True
 >>> user.save()
 >>> exit()
-`
+```
 ### Create standard users
-`
+```
 python manage.py shell
 >>> user=User.objects.create_user('user_2', password='user2_pw')
 >>> user.is_superuser=False
@@ -50,23 +50,23 @@ python manage.py shell
 >>> user.is_staff=False
 >>> user.save()
 >>> exit()
-`
-### Create courses
-### Create participations
+```
 
+### Test the API by creating courses (as admin) and managing participations (as admin, and as user)
 ## For admins
 ### Admin course management
 Create Courses
-<br/>`http -a admin:admin POST http://127.0.0.1:8000/courses/ course_title="Course 7" course_phases="['Lobby', 'Welcome', 'Warmup']"`
+<br/>`http -a admin:admin POST http://127.0.0.1:8000/courses/ course_title="Course 1" course_phases="['Lobby', 'Welcome', 'Warmup']"`
 
 Get all courses
 <br/>`http -a admin:admin GET http://127.0.0.1:8000/courses/`
 
 Delete courses
-<br/>`http -a admin:admin DELETE http://127.0.0.1:8000/courses/admindelete/7/`
+<br/>`http -a admin:admin DELETE http://127.0.0.1:8000/courses/admindelete/1/`
+<br/>The primary key int:pk, here "1", is the course_id; it can be determined by getting all courses and their course_id, see paragraph above
 
 Remove user from course
-<br/>`http -a admin:admin DELETE http://127.0.0.1:8000/participations/admindelete/ user_id=4`
+<br/>`http -a admin:admin DELETE http://127.0.0.1:8000/participations/admindelete/ user_id=1`
 
 ### Admin participation management
 Create participation for user
@@ -76,25 +76,26 @@ Get all participations
 <br/>`http -a admin:admin GET http://127.0.0.1:8000/participations/`
 
 Update course phase of a user's current course participation
-<br/>`http -a admin:admin PUT http://127.0.0.1:8000/participations/update/13/ participation_course_id=8 participation_course_phase=2`
-<br/>The primary key int:pk, here "13", is the participation_id; it can be determined by getting the user's currently valid course participation, see paragraph above
+<br/>`http -a admin:admin PUT http://127.0.0.1:8000/participations/update/1/ participation_course_id=1 participation_course_phase=1`
+<br/>`http -a admin:admin PUT http://127.0.0.1:8000/participations/update/1/ participation_course_id=1 participation_course_phase=2`
+<br/>The primary key int:pk, here "1", is the participation_id; it can be determined by getting the user's currently valid course participation, see paragraph above
 
-Delete participation
+Delete participation (kick user from course)
 <br/>`http -a admin:admin DELETE http://127.0.0.1:8000/participations/admindelete/ user_id=1`
 
 ## For users
 Enter course (create participation)
-<br/>`http -a user_4:user4_pw POST http://127.0.0.1:8000/participations/create/ participation_course_id=8 participation_course_phase=1`
+<br/>`http -a user_2:user2_pw POST http://127.0.0.1:8000/participations/create/ participation_course_id=2 participation_course_phase=0`
 
-Get course phase of own current course participation
-<br/>`http -a user_4:user4_pw GET http://127.0.0.1:8000/participations/`
+Get participation_course_phase and participation_id of own current course participation
+<br/>`http -a user_2:user2_pw GET http://127.0.0.1:8000/participations/`
 
 Update own current course participation
-<br/>`http -a user_4:user4_pw PUT http://127.0.0.1:8000/participations/update/13/ participation_course_id=8 participation_course_phase=1`
-<br/>The primary key int:pk, here "13", is the participation_id; it can be determined by getting the currently valid course participation, see paragraph above
+<br/>`http -a user_2:user2_pw PUT http://127.0.0.1:8000/participations/update/2/ participation_course_id=2 participation_course_phase=1`
+<br/>The primary key int:pk, here "2", is the participation_id; it can be determined by getting the currently valid course participation, see paragraph above
 
 Exit course (delete own participation)
-<br/>`http -a user_4:user4_pw DELETE http://127.0.0.1:8000/participations/delete/`
+<br/>`http -a user_2:user2_pw DELETE http://127.0.0.1:8000/participations/delete/`
 
 # How to create it
 ## How to learn to create web APIs with Django
