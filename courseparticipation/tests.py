@@ -34,19 +34,22 @@ class TestApi(APITestCase):
         DbEntriesCreation().create_user(auth_username_user, auth_password_user, False, False)
         return User.objects.get(username=auth_username_user)
 
-    def create_test_course_response(self, user, course_title):
+    def create_test_course_response(self, user, course_title, course_phases):
         view = CourseList.as_view()
         factory = APIRequestFactory()
-        request = factory.post('/courses/', {'course_title': course_title})
+        request = factory.post('/courses/', {'course_title': course_title, 'course_phases': course_phases})
         force_authenticate(request, user=user)
         return view(request)
 
-    def create_test_participation_response(self, user, participation_course_id):
+    def create_test_participation_response(self, user, participation_course_id, participation_course_phase):
         view = ParticipationCreation.as_view()
         factory = APIRequestFactory()
-        request = factory.post('/participations/update/', {'participation_course_id': participation_course_id})
+        request = factory.post('/participations/update/', {'participation_course_id': participation_course_id, 'participation_course_phase': participation_course_phase})
         force_authenticate(request, user=user)
         return view(request)
+
+    def get_test_phases(self):
+        return "['Lobby Start', 'Welcome', 'Warmup', 'Push', 'Cooldown', 'Goodbye', 'Lobby End']"
 
     def get_test_participation_response(self, user):
         view = ParticipationList.as_view()
@@ -90,28 +93,28 @@ class TestApi(APITestCase):
     ## Only allow admins to create courses
     def test_permission_course_creation(self):
         # Course creation by admin should get status code 201
-        response = self.create_test_course_response(self.auth_test_admin(), 'Test Course Permission')
+        response = self.create_test_course_response(self.auth_test_admin(), 'Test Course Permission', self.get_test_phases())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # Course creation by any other user should get a 403 error (as defined in exceptions.py of rest_framework)
-        response = self.create_test_course_response(self.auth_test_user(), 'Test Course Permission')
+        response = self.create_test_course_response(self.auth_test_user(), 'Test Course Permission', self.get_test_phases())
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # Test scope: participations
     ## Only allow users or admins to create course participations
     def test_permission_participation_creation(self):
         # Create test course as reference
-        response_course_creation = self.create_test_course_response(self.auth_test_admin(), 'Test Course Participation')
+        response_course_creation = self.create_test_course_response(self.auth_test_admin(), 'Test Course Participation', self.get_test_phases())
         # Participation creation by test user should get status code 201
-        response = self.create_test_participation_response(self.auth_test_user(), response_course_creation.data['course_id'])
+        response = self.create_test_participation_response(self.auth_test_user(), response_course_creation.data['course_id'], 0)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_permission_participation_view(self):
         # Create test course as reference
-        response_course_creation = self.create_test_course_response(self.auth_test_admin(), 'Test Course Participation')
+        response_course_creation = self.create_test_course_response(self.auth_test_admin(), 'Test Course Participation', self.get_test_phases())
         # Create test user
         test_user = self.auth_test_user()
         # Create test participation
-        self.create_test_participation_response(test_user, response_course_creation.data['course_id'])
+        self.create_test_participation_response(test_user, response_course_creation.data['course_id'], 0)
         # Get participation view response
         response = self.get_test_participation_response(test_user)
         # Participation view response by test user should only show one participation
