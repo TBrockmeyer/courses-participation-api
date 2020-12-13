@@ -123,8 +123,32 @@ class ParticipationUpdate(generics.UpdateAPIView):
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
     # TODO: ensure that a participation_course_phase is within the available range of phases
-    # TODO: ensure that only the participation_course_phase can be updated (not the participation_course_id).
+    # TODO: ensure that only the participation_course_phase may be updated (not the participation_course_id).
     # For switching participation_course_id, old participation needs to be deleted and a new one created.
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        existing_participation = Participation.objects.filter(participation_id=kwargs['pk'])
+        existing_participation_course_id = existing_participation.values()[0]['participation_course_id_id']
+
+        # Ensure that users may only jump between course phases within one course
+        if(int(request.data['participation_course_id']) != existing_participation_course_id):
+            # Raise Error
+            message = "Users may only jump between phases within one course. If current course shall be exited, delete unwanted participation first by calling participations/delete/."
+            raise exceptions.ValidationError(detail=message)
+
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
 
 class ParticipationDeletion(generics.DestroyAPIView):
