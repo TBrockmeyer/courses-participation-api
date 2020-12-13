@@ -65,10 +65,7 @@ class ParticipationCreation(generics.CreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: adapt tests (Course creation tests) to new field "course_phases"
     # TODO: ensure that the Course objects are aware of their participations (e.g. through dicts or json)
-    # TODO: ensure that jumps between phases only allowed between directly adjoining course phases
-    # (needs to unsubscribe there / or indicate new phase if already in Course)
     """
     Check given user_id: does have existing participation?
     ├─ No ► Create new participation with requested user_id, course_id and course_phase
@@ -122,9 +119,6 @@ class ParticipationUpdate(generics.UpdateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: ensure that a participation_course_phase is within the available range of phases
-    # TODO: ensure that only the participation_course_phase may be updated (not the participation_course_id).
-    # For switching participation_course_id, old participation needs to be deleted and a new one created.
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -213,9 +207,6 @@ class ParticipationList(generics.ListAPIView):
     queryset = Participation.objects.all()
     serializer_class = ParticipationSerializer
     permission_classes = [IsOwnerOrAdmin]
-
-    # TODO: ensure that list only shows participations relevant to authenticated user
-    # TODO: write separate endpoint to provide primary key of participation
 
     """
     List a queryset.
