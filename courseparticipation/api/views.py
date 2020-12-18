@@ -21,7 +21,11 @@ from django.contrib.auth.models import User
 
 from api.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
 
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
+
+from django.utils import timezone, dateformat
+
+import datetime
 
 # TODO: check if all classes are compatible with UI, i.e. if there's a button "create" or "destroy" if applicable. Otherwise change & rewrite view types
 
@@ -38,6 +42,9 @@ class CourseList(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        # Set the first course_starttime to the course creation time.
+        # Will be overridden upon every real next course start, as defined in class CourseUpdateRuntime
+        request.data['course_starttime'] = dateformat.format(timezone.now(), 'Y-m-d H:i:s')
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -137,6 +144,138 @@ class ParticipationUpdate(generics.UpdateAPIView):
             message = "Users may only jump between phases within one course. If current course shall be exited, delete unwanted participation first by calling participations/delete/."
             raise exceptions.ValidationError(detail=message)
 
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+
+class CourseUpdateRuntime(generics.UpdateAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # TODO: Write test cases for all possible combinations of users distributed over the course phases (lobby / non-lobby / no users at all)
+    # and for each combination, all possible transitions (from lobby to non-lobby, directly into non-lobby, directly from non-lobby out (harsh exit / kicked))
+    # TODO: call class CourseUpdateRuntime whenever a transition is happening
+    # TODO: write an endpoint to retrieve the course_runtime_formatted
+
+    """
+    Re-calculate passed days, hours, minutes, seconds from given seconds
+    Adapted from: https://stackoverflow.com/questions/4048651/python-function-to-convert-seconds-into-minutes-hours-and-days
+    """
+
+    def display_time(self, seconds, granularity=2):
+        self.intervals = (
+            ('days', 86400),    # 60 * 60 * 24
+            ('hours', 3600),    # 60 * 60
+            ('minutes', 60),
+            ('seconds', 1),
+        )
+
+        result = []
+
+        granularity = 3 if seconds >= 3600 else granularity
+        granularity = 4 if seconds >= 86400 else granularity
+
+        for _, count in self.intervals:
+            value = seconds // count
+            seconds -= value * count
+            result.append("{}".format(value).zfill(2))
+        return ':'.join(result[-granularity:])
+
+    """
+    Update a model instance.
+    """
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        requested_runtime = -1
+        try:
+            requested_runtime = int(request.data['course_runtime'])
+        except:
+            pass
+
+        relevant_course_id = instance.course_id
+        existing_course_values = list(Course.objects.filter(course_id=relevant_course_id).values())[0]
+        existing_course_phase_max = len(eval(existing_course_values['course_phases'])) - 1
+
+        number_users_lobby_start = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=0).values())))
+        number_users_lobby_end = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=existing_course_phase_max).values())))
+        number_users_course = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id).values())))
+        number_users_lobby = number_users_lobby_start + number_users_lobby_end
+        number_users_nonlobby = number_users_course - number_users_lobby
+        number_users_phase_first_timed = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=1).values())))
+
+        existing_course_runtime = existing_course_values['course_runtime']
+        existing_course_starttime = existing_course_values['course_starttime']
+
+        date_format_datetime = '%Y-%m-%d %H:%M:%S'
+        date_format_datetime_seconds = '%S'
+        date_format_timezone = 'Y-m-d H:i:s'
+
+        if(number_users_nonlobby > 0 and int(requested_runtime) != 0):
+            # "There is already at least one user inside the course, in non-lobby phases, and the provided course_runtime is -1 // not provided"
+            # This describes the case where the application intends to know or keep updated the course_runtime
+            # (e.g. during a request to retrieve the course_runtime; or during any participation update)
+            # Recalculate course_runtime from current time minus course_starttime
+            # Set / leave course_starttime to existing course_starttime
+            current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)
+            course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(existing_course_starttime, date_format_datetime), date_format_datetime)
+            timediff = int((current_time - course_starttime).total_seconds())
+            request.data['course_runtime'] = timediff
+            request.data['course_runtime_formatted'] = self.display_time(request.data['course_runtime'])
+
+        elif(number_users_phase_first_timed == 1 and number_users_course == 1 and int(requested_runtime) == 0):
+            # "There is exactly one user inside the first timed phase of the course, and the provided course_runtime is 0"
+            # Whenever a user switches from phase 0 ('Lobby Start') to phase 1 ('Warmup'),
+            # the update call tries to indicate that this is a "time 0" call,
+            # i.e. that it's the first user entering and thus starting the course.
+            # We follow this indication only if there are no other users anywhere in the course,
+            # except for the first lobby phase ('Lobby Start').
+            # Set course_starttime to now.
+            # Set course-runtime to 0.
+            current_time = dateformat.format(timezone.now(), date_format_timezone)
+            request.data['course_starttime'] = current_time
+            request.data['course_runtime'] = 0
+            request.data['course_runtime_formatted'] = self.display_time(request.data['course_runtime'])
+
+        elif(number_users_nonlobby == 0 and int(requested_runtime) == -1):
+            # "There are no users in the non-lobby phases of the course, and the provided course_runtime is -1"
+            # Whenever a user switches from phase -2 (e.g. 'Goodbye') to phase -1 ('Lobby End'),
+            # or from phase 1 (e.g. 'Welcome') to phase 0 ('Lobby Start'),
+            # the update call tries to indicate that this is a "time end" call,
+            # i.e. that it's the last or first user exiting (again) and thus closing the course.
+            # We follow this indication only if there are no other users anywhere in the course,
+            # except for the last lobby phase ('Lobby End').
+            # Set course_starttime to existing course_starttime
+            # Set course_runtime to existing course_runtime.
+            current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)
+            course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(existing_course_starttime, date_format_datetime), date_format_datetime)
+            timediff = int((current_time - course_starttime).total_seconds())
+            # request.data['course_starttime'] = course_starttime
+            request.data['course_runtime'] = timediff
+            request.data['course_runtime_formatted'] = self.display_time(request.data['course_runtime'])
+
+        else:
+            # "There are users in the last lobby phase, and course_runtime is > 0:"
+            # Or: none of all other cases apply
+            # Or: the app just wants to know how long the course is already running
+            # Set course_starttime to existing course_starttime
+            # Set course_runtime to existing course_runtime
+            course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(existing_course_starttime, date_format_datetime), date_format_datetime)
+            request.data['course_starttime'] = course_starttime
+            request.data['course_runtime'] = existing_course_runtime
+            request.data['course_runtime_formatted'] = self.display_time(request.data['course_runtime'])
+
+
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
         if getattr(instance, '_prefetched_objects_cache', None):
