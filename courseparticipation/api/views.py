@@ -23,6 +23,8 @@ from api.permissions import IsAdminOrReadOnly, IsOwnerOrAdmin
 
 from rest_framework.permissions import IsAdminUser
 
+# TODO: check if all classes are compatible with UI, i.e. if there's a button "create" or "destroy" if applicable. Otherwise change & rewrite view types
+
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
