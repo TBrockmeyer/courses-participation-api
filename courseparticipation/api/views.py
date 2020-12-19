@@ -216,20 +216,8 @@ class CourseUpdateRuntime(generics.UpdateAPIView):
         date_format_datetime_seconds = '%S'
         date_format_timezone = 'Y-m-d H:i:s'
 
-        if(number_users_nonlobby > 0 and int(requested_runtime) != 0):
-            # "There is already at least one user inside the course, in non-lobby phases, and the provided course_runtime is -1 // not provided"
-            # This describes the case where the application intends to know or keep updated the course_runtime
-            # (e.g. during a request to retrieve the course_runtime; or during any participation update)
-            # Recalculate course_runtime from current time minus course_starttime
-            # Set / leave course_starttime to existing course_starttime
-            current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)
-            course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(existing_course_starttime, date_format_datetime), date_format_datetime)
-            timediff = int((current_time - course_starttime).total_seconds())
-            request.data['course_runtime'] = timediff
-            request.data['course_runtime_formatted'] = self.display_time(request.data['course_runtime'])
-
-        elif(number_users_phase_first_timed == 1 and number_users_course == 1 and int(requested_runtime) == 0):
-            # "There is exactly one user inside the first timed phase of the course, and the provided course_runtime is 0"
+        if(number_users_phase_first_timed == 1 and number_users_nonlobby == 1 and int(requested_runtime) == 0):
+            # "There is exactly one user inside the first timed phase of the course, and the requested course_runtime is 0"
             # Whenever a user switches from phase 0 ('Lobby Start') to phase 1 ('Warmup'),
             # the update call tries to indicate that this is a "time 0" call,
             # i.e. that it's the first user entering and thus starting the course.
@@ -242,32 +230,26 @@ class CourseUpdateRuntime(generics.UpdateAPIView):
             request.data['course_runtime'] = 0
             request.data['course_runtime_formatted'] = self.display_time(request.data['course_runtime'])
 
-        elif(number_users_nonlobby == 0 and int(requested_runtime) == -1):
-            # "There are no users in the non-lobby phases of the course, and the provided course_runtime is -1"
-            # Whenever a user switches from phase -2 (e.g. 'Goodbye') to phase -1 ('Lobby End'),
-            # or from phase 1 (e.g. 'Welcome') to phase 0 ('Lobby Start'),
-            # the update call tries to indicate that this is a "time end" call,
-            # i.e. that it's the last or first user exiting (again) and thus closing the course.
-            # We follow this indication only if there are no other users anywhere in the course,
-            # except for the last lobby phase ('Lobby End').
-            # Set course_starttime to existing course_starttime
-            # Set course_runtime to existing course_runtime.
-            current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)
-            course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(existing_course_starttime, date_format_datetime), date_format_datetime)
-            timediff = int((current_time - course_starttime).total_seconds())
-            # request.data['course_starttime'] = course_starttime
-            request.data['course_runtime'] = timediff
+        elif(number_users_nonlobby == 0):
+            # "There are no users in the non-lobby phases of the course"
+            # This describes e.g. the cases where
+            # ├─ a list of the courses is requested, and no user is inside the course
+            # └─ the last user just left the course
+            # Set course_starttime to 0000-00-00T00:00:00Z
+            # Set course_runtime to 0
+            request.data['course_starttime'] = "0001-01-01T00:00:00Z"
+            request.data['course_runtime'] = 0
             request.data['course_runtime_formatted'] = self.display_time(request.data['course_runtime'])
 
         else:
-            # "There are users in the last lobby phase, and course_runtime is > 0:"
-            # Or: none of all other cases apply
-            # Or: the app just wants to know how long the course is already running
+            # "There are already/still users in the non-lobby phases of the course, and the requested course_runtime is not 0"
             # Set course_starttime to existing course_starttime
-            # Set course_runtime to existing course_runtime
+            # Set (update) course_runtime to timediff between now and course_starttime
+            current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)
             course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(existing_course_starttime, date_format_datetime), date_format_datetime)
-            request.data['course_starttime'] = course_starttime
-            request.data['course_runtime'] = existing_course_runtime
+            timediff = int((current_time - course_starttime).total_seconds())
+            request.data['course_starttime'] = existing_course_starttime
+            request.data['course_runtime'] = timediff
             request.data['course_runtime_formatted'] = self.display_time(request.data['course_runtime'])
 
 
