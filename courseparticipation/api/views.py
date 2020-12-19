@@ -71,6 +71,7 @@ class ParticipationCreation(generics.CreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
+    # TODO: allow only participation_course_phase within the range of allowed phases of the specific course
     # TODO: ensure that the Course objects are aware of their participations (e.g. through dicts or json)
     """
     Check given user_id: does have existing participation?
@@ -125,6 +126,7 @@ class ParticipationUpdate(generics.UpdateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
+    # TODO: allow only participation_course_phase within the range of allowed phases of the specific course
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -143,6 +145,9 @@ class ParticipationUpdate(generics.UpdateAPIView):
 
         self.perform_update(serializer)
 
+        # TODO: Call here the course runtime update endpoint.
+        # └─ Call it with course_runtime=0 ONLY IF phase before was nontimed, and new phase is timed
+
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
             # forcibly invalidate the prefetch cache on the instance.
@@ -156,10 +161,25 @@ class CourseUpdateRuntime(generics.UpdateAPIView):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    """
+    Update the fields course_starttime, course_runtime, course_runtime_formatted.
+    This view class is the view matched to courses/update/runtime/.
+    This endpoint needs to be called each time after one of the following endpoints is called:
+    ├─ courses/ (all courses are listed)
+    ├─ participations/delete/ (user leaves course)
+    ├─ participations/create/ (user enters course)
+    ├─ participations/admindelete/ (user is kicked from course by admin)
+    └─ participations/update/ (a user transitions between course phases)
+
+    """
+
     # TODO: Write test cases for all possible combinations of users distributed over the course phases (lobby / non-lobby / no users at all)
     # and for each combination, all possible transitions (from lobby to non-lobby, directly into non-lobby, directly from non-lobby out (harsh exit / kicked))
     # TODO: call class CourseUpdateRuntime whenever a transition is happening
     # TODO: write an endpoint to retrieve the course_runtime_formatted
+    # TODO: write an endpoint that updates all courses
+    # TODO: refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
+    # └─ rename _lobby and _nonlobby to _nontimed and _timed
 
     """
     Re-calculate passed days, hours, minutes, seconds from given seconds
