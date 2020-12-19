@@ -145,8 +145,8 @@ class ParticipationUpdate(generics.UpdateAPIView):
 
         self.perform_update(serializer)
 
-        # TODO: Call here the course runtime update endpoint.
-        # └─ Call it with course_runtime=0 ONLY IF phase before was nontimed, and new phase is timed
+        # TODO: Update here the course runtime.
+        # └─ Call it with course_runtime=0 ONLY IF phase before was nontimed, and new phase is timed.
 
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
@@ -177,6 +177,7 @@ class CourseUpdateRuntime(generics.UpdateAPIView):
     # and for each combination, all possible transitions (from lobby to non-lobby, directly into non-lobby, directly from non-lobby out (harsh exit / kicked))
     # TODO: call class CourseUpdateRuntime whenever a transition is happening
     # TODO: write an endpoint to retrieve the course_runtime_formatted
+    # TODO: change the permissions for this class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
     # TODO: write an endpoint that updates all courses
     # TODO: refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
     # └─ rename _lobby and _nonlobby to _nontimed and _timed
