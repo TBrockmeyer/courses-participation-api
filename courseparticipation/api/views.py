@@ -42,9 +42,6 @@ class CourseList(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        # Set the first course_starttime to the course creation time.
-        # Will be overridden upon every real next course start, as defined in class CourseUpdateRuntime
-        request.data['course_starttime'] = dateformat.format(timezone.now(), 'Y-m-d H:i:s')
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
