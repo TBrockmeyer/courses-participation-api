@@ -58,12 +58,12 @@ class TestApi(APITestCase):
         force_authenticate(request, user=user)
         return view(request)
 
-    def create_test_participation_update_response(self, user, primary_key, participation_course_id, participation_course_phase):
+    def create_test_participation_update_response(self, user, participation_id, participation_course_id, participation_course_phase):
         view = ParticipationUpdate.as_view()
         factory = APIRequestFactory()
         request = factory.put('', {'participation_course_id': participation_course_id, 'participation_course_phase': participation_course_phase})
         force_authenticate(request, user=user)
-        return view(request, pk=str(primary_key))
+        return view(request, pk=str(participation_id))
 
     # Test methods:
     # Test scope: displaying courses list
