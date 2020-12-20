@@ -12,7 +12,7 @@ from api.models import Course, Participation
 from rest_framework import generics, status, exceptions
 
 from api.serializers import CourseSerializer, UserSerializer, ParticipationSerializer
-from api.generate_db_entries import DbEntriesCreation
+from api.update_db_entries import DbEntriesUpdate
 
 # https://www.django-rest-framework.org/tutorial/2-requests-and-responses/
 from rest_framework.response import Response
@@ -147,6 +147,9 @@ class ParticipationUpdate(generics.UpdateAPIView):
 
         # TODO: Update here the course runtime.
         # └─ Call it with course_runtime=0 ONLY IF phase before was nontimed, and new phase is timed.
+        course_id_list = [existing_participation_course_id]
+        db_entries_update = DbEntriesUpdate()
+        db_entries_update.update_course_time(course_id_list, True)
 
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
