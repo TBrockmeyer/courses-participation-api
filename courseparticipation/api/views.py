@@ -176,15 +176,6 @@ class CourseUpdateRuntime(generics.UpdateAPIView):
 
     """
 
-    # TODO: Write test cases for all possible combinations of users distributed over the course phases (lobby / non-lobby / no users at all)
-    # and for each combination, all possible transitions (from lobby to non-lobby, directly into non-lobby, directly from non-lobby out (harsh exit / kicked))
-    # TODO: call class CourseUpdateRuntime whenever a transition is happening
-    # TODO: write an endpoint to retrieve the course_runtime_formatted
-    # TODO: change the permissions for this class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
-    # TODO: write an endpoint that updates all courses
-    # TODO: refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
-    # └─ rename _lobby and _nonlobby to _nontimed and _timed
-
     """
     Re-calculate passed days, hours, minutes, seconds from given seconds
     Adapted from: https://stackoverflow.com/questions/4048651/python-function-to-convert-seconds-into-minutes-hours-and-days
@@ -237,7 +228,6 @@ class CourseUpdateRuntime(generics.UpdateAPIView):
         existing_course_starttime = existing_course_values['course_starttime']
 
         date_format_datetime = '%Y-%m-%d %H:%M:%S'
-        date_format_datetime_seconds = '%S'
         date_format_timezone = 'Y-m-d H:i:s'
 
         if(number_users_phase_first_timed == 1 and number_users_nonlobby == 1 and int(requested_runtime) == 0):
