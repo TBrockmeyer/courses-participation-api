@@ -56,13 +56,13 @@ class DbEntriesUpdate:
 
         """
 
-        # TODO: Write test cases for all possible combinations of users distributed over the course phases (lobby / non-lobby / no users at all)
+        # TODO: [UCT - tests] Write test cases for all possible combinations of users distributed over the course phases (lobby / non-lobby / no users at all)
         # and for each combination, all possible transitions (from lobby to non-lobby, directly into lobby, directly into non-lobby, directly from non-lobby out (harsh exit / kicked))
-        # TODO: call class CourseUpdateRuntime whenever a transition is happening
-        # TODO: write an endpoint to retrieve the course_runtime_formatted
-        # TODO: change the permissions for this class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
-        # TODO: write an endpoint that updates all courses
-        # TODO: refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
+        # TODO: [UCT - cleanup] delete old course runtime update VIEW?
+        # TODO: [UCT - imple] call class CourseUpdateRuntime whenever a transition is happening or courses view requested
+        # TODO: [UCT - imple] write an endpoint to retrieve the course_runtime_formatted
+        # TODO: [UCT - permissions] change the permissions for this class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
+        # TODO: [UCT - refac] refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
         # └─ rename _lobby and _nonlobby to _nontimed and _timed
 
         relevant_course_id = course_id_list[0]
@@ -103,13 +103,13 @@ class DbEntriesUpdate:
             # └─ the last user just left the course
             # Set course_starttime to 0000-00-00T00:00:00Z
             # Set course_runtime to 0
-            course_starttime = "0001-01-01T00:00:00Z"
+            course_starttime = existing_course_starttime
             course_runtime = 0
             course_runtime_formatted = display_time(course_runtime)
             Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
 
         else:
-            # "There are already/still users in the non-lobby phases of the course, and the requested course_runtime is not 0"
+            # "There are already/still users in the non-lobby phases of the course, and no reset_runtime is requested"
             # Set course_starttime to existing course_starttime
             # Set (update) course_runtime to timediff between now and course_starttime
             current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)

@@ -27,14 +27,12 @@ from django.utils import timezone, dateformat
 
 import datetime
 
-# TODO: check if all classes are compatible with UI, i.e. if there's a button "create" or "destroy" if applicable. Otherwise change & rewrite view types
+# TODO: [General - imple] check if all classes are compatible with UI, i.e. if there's a button "create" or "destroy" if applicable. Otherwise change & rewrite view types
 
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [IsAdminOrReadOnly]
-
-    # TODO: add timer field to courses and update it depending on users entering the course / the lobby phase
 
     def perform_create(self, serializer):
         # Owner may be defined e.g. through serializer.save(owner=self.request.user)
@@ -71,8 +69,8 @@ class ParticipationCreation(generics.CreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: allow only participation_course_phase within the range of allowed phases of the specific course
-    # TODO: ensure that the Course objects are aware of their participations (e.g. through dicts or json)
+    # TODO: [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
+    # TODO: [Course - imple] ensure that the Course objects are aware of their participations (e.g. through dicts or json)
     """
     Check given user_id: does have existing participation?
     ├─ No ► Create new participation with requested user_id, course_id and course_phase
@@ -126,7 +124,7 @@ class ParticipationUpdate(generics.UpdateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: allow only participation_course_phase within the range of allowed phases of the specific course
+    # TODO: [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -145,11 +143,13 @@ class ParticipationUpdate(generics.UpdateAPIView):
 
         self.perform_update(serializer)
 
-        # TODO: Update here the course runtime.
-        # └─ Call it with course_runtime=0 ONLY IF phase before was nontimed, and new phase is timed.
+        # Call runtime update, ONLY with reset_runtime=True IF phase before was nontimed, and new phase is timed.
         course_id_list = [existing_participation_course_id]
         db_entries_update = DbEntriesUpdate()
+        # TODO: [ParticipationUpdate - imple] Case distinction: phase before (non-)lobby, phase requested (non-)lobby
+        # If user changes from nonlobby to lobby phase, request reset_runtime (will be followed if no other users in nonlobby)
         db_entries_update.update_course_time(course_id_list, True)
+        # Else, do not request reset_runtime
 
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
