@@ -210,12 +210,12 @@ class TestApiParticipationUpdate(APITestCase):
     # Test fixtures
     def setUp(self):
         self.test_admin = self.auth_test_admin()
-        self.test_user = self.auth_test_user()
+        self.test_user_1 = self.auth_test_user()
         self.test_user_2 = self.auth_test_user()
         self.test_course = self.create_test_course_response(self.test_admin, 'Test Course Participation', self.get_test_phases())
         self.test_participation_course_phase_initial = 0
         self.test_participation = self.create_test_participation_response(
-            self.test_user,
+            self.test_user_1,
             self.test_course.data['course_id'],
             self.test_participation_course_phase_initial
         )
@@ -226,32 +226,76 @@ class TestApiParticipationUpdate(APITestCase):
         )
 
     def test_participation_update_first_users(self):
-        participation_id = self.test_participation.data['participation_id']
+        participation_1_id = self.test_participation.data['participation_id']
         participation_2_id = self.test_participation_2.data['participation_id']
         participation_course_id = self.test_participation.data['participation_course_id']
         participation_course_phase = 1
 
-        # Participation update with entering a nonlobby phase by first test user (if updating course phase only) should
+        # Participation update with
+        # ├─ first user entering a lobby phase
+        # should
+        # ├─ not update course_starttime
+        # └─ not update course_runtime
+        course_object_values_pre = Course.objects.filter(course_id=participation_course_id).values()[0]
+        delay_user = 1.0
+        time.sleep(delay_user)
+        response = self.create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, self.test_participation_course_phase_initial)
+        course_object_values_post = Course.objects.filter(course_id=participation_course_id).values()[0]
+
+        self.assertEqual(course_object_values_post['course_starttime'], course_object_values_pre['course_starttime'])
+        self.assertEqual(course_object_values_post['course_runtime'], 0)
+
+        # Participation update with
+        # ├─ first user entering a nonlobby phase
+        # should
         # ├─ update course_starttime
         # └─ not update course_runtime
         course_object_values_pre = Course.objects.filter(course_id=participation_course_id).values()[0]
         delay_user = 1.0
         time.sleep(delay_user)
-        response = self.create_test_participation_update_response(self.test_user, participation_id, participation_course_id, participation_course_phase)
+        response = self.create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, participation_course_phase)
         course_object_values_post = Course.objects.filter(course_id=participation_course_id).values()[0]
 
         self.assertNotEqual(course_object_values_post['course_starttime'], course_object_values_pre['course_starttime'])
         self.assertEqual(course_object_values_post['course_runtime'], 0)
 
-        # Participation update with entering a nonlobby phase by second test user (if updating course phase only) should
+        # Participation update with
+        # ├─ second user entering a nonlobby phase
+        # should
         # ├─ not update course_starttime
-        # └─ update course_runtime to specified delay_user_2
-        delay_user_2 = 1.0
-        time.sleep(delay_user_2)
+        # └─ update course_runtime to specified delay_user_2_entering
+        delay_user_2_entering = 1.0
+        time.sleep(delay_user_2_entering)
         response = self.create_test_participation_update_response(self.test_user_2, participation_2_id, participation_course_id, participation_course_phase)
         course_object_values_post_2 = Course.objects.filter(course_id=participation_course_id).values()[0]
         self.assertEqual(course_object_values_post_2['course_starttime'], course_object_values_post['course_starttime'])
-        self.assertEqual(course_object_values_post_2['course_runtime'], delay_user_2)
+        self.assertEqual(course_object_values_post_2['course_runtime'], delay_user_2_entering)
+
+        # Participation update with
+        # ├─ first user being in a nonlobby phase
+        # ├─ second user being in a nonlobby phase
+        # ├─ second user entering a lobby phase
+        # should
+        # ├─ not update course_starttime
+        # └─ update course_runtime to specified delay_user_2_exiting
+        delay_user_2_exiting = 1.0
+        time.sleep(delay_user_2_exiting)
+        response = self.create_test_participation_update_response(self.test_user_2, participation_2_id, participation_course_id, self.test_participation_course_phase_initial)
+        course_object_values_post_3 = Course.objects.filter(course_id=participation_course_id).values()[0]
+        self.assertEqual(course_object_values_post_3['course_starttime'], course_object_values_post_2['course_starttime'])
+        self.assertEqual(course_object_values_post_3['course_runtime'], delay_user_2_exiting)
+
+        # Participation update with
+        # ├─ first user entering a lobby phase
+        # should
+        # ├─ not update course_starttime
+        # └─ update course_runtime to 0
+        delay_user_1_exiting = 1.0
+        time.sleep(delay_user_1_exiting)
+        response = self.create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, self.test_participation_course_phase_initial)
+        course_object_values_post_4 = Course.objects.filter(course_id=participation_course_id).values()[0]
+        self.assertEqual(course_object_values_post_4['course_starttime'], course_object_values_post_3['course_starttime'])
+        self.assertEqual(course_object_values_post_4['course_runtime'], 0)
 
 
 if __name__ == '__main__':
