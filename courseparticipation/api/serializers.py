@@ -14,7 +14,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ['course_id', 'course_title', 'course_phases', 'course_starttime', 'course_runtime', 'course_runtime_formatted', 'participations']
+        fields = ['course_id', 'course_title', 'course_phases', 'course_phases_timed', 'course_phases_nontimed', 'course_starttime', 'course_runtime', 'course_runtime_formatted', 'participations']
 
 
 class UserSerializer(serializers.ModelSerializer):

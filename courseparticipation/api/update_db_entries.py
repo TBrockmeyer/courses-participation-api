@@ -64,19 +64,28 @@ class DbEntriesUpdate:
         # TODO: [UCT - permissions] change the permissions for this class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
         # TODO: [UCT - refac] refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
         # └─ rename _lobby and _nonlobby to _nontimed and _timed
+        # TODO: [UCT - refac] simplify everything below, by passing the requested and existing phases from view.py
+        # TODO: [UCT - refac] rename existing_course_ by relevant_course_
 
         relevant_course_id = course_id_list[0]
-        existing_course_values = list(Course.objects.filter(course_id=relevant_course_id).values())[0]
-        existing_course_starttime = existing_course_values['course_starttime']
 
-        existing_course_phase_max = len(eval(existing_course_values['course_phases'])) - 1
+        relevant_course = Course.objects.filter(course_id=relevant_course_id)
+        relevant_course_starttime = relevant_course.values()[0]['course_starttime']
+        relevant_course_phases = eval(relevant_course.values()[0]['course_phases'])
+        relevant_course_phases_timed = eval(relevant_course.values()[0]['course_phases_timed'])
+        relevant_course_phases_nontimed = eval(relevant_course.values()[0]['course_phases_nontimed'])
 
-        number_users_lobby_start = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=0).values())))
-        number_users_lobby_end = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=existing_course_phase_max).values())))
+        number_users_lobby = 0
+
+        for phase in relevant_course_phases_nontimed:
+            phase_index = relevant_course_phases.index(phase)
+            number_users_lobby += int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index).values())))
+
         number_users_course = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id).values())))
-        number_users_lobby = number_users_lobby_start + number_users_lobby_end
         number_users_nonlobby = number_users_course - number_users_lobby
-        number_users_phase_first_timed = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=1).values())))
+
+        phase_index_first_timed = relevant_course_phases.index(relevant_course_phases_timed[0]) if len(relevant_course_phases_timed) > 0 else 0
+        number_users_phase_first_timed = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index_first_timed).values()))) if len(relevant_course_phases_timed) > 0 else 0
 
         date_format_datetime = '%Y-%m-%d %H:%M:%S'
         date_format_timezone = 'Y-m-d H:i:s'
@@ -103,7 +112,7 @@ class DbEntriesUpdate:
             # └─ the last user just left the course
             # Set course_starttime to 0000-00-00T00:00:00Z
             # Set course_runtime to 0
-            course_starttime = existing_course_starttime
+            course_starttime = relevant_course_starttime
             course_runtime = 0
             course_runtime_formatted = display_time(course_runtime)
             Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
@@ -113,9 +122,9 @@ class DbEntriesUpdate:
             # Set course_starttime to existing course_starttime
             # Set (update) course_runtime to timediff between now and course_starttime
             current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)
-            course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(existing_course_starttime, date_format_datetime), date_format_datetime)
+            course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(relevant_course_starttime, date_format_datetime), date_format_datetime)
             timediff = int((current_time - course_starttime).total_seconds())
-            course_starttime = existing_course_starttime
+            course_starttime = relevant_course_starttime
             course_runtime = timediff
             course_runtime_formatted = display_time(course_runtime)
             Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
