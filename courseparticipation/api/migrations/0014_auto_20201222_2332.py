@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='course',
             name='course_phases_timed',
-            field=models.CharField(blank=True, default="['Warmup', 'Push', 'Cooldown'", max_length=500),
+            field=models.CharField(blank=True, default="['Warmup', 'Push', 'Cooldown']", max_length=500),
         ),
         migrations.AlterField(
             model_name='course',

@@ -6,7 +6,7 @@ class Course(models.Model):
     course_id = models.AutoField(unique=True, primary_key=True)
     course_title = models.CharField(max_length=100, blank=True, default='')
     course_phases = models.CharField(max_length=500, blank=True, default="['Lobby Start', 'Warmup', 'Push', 'Cooldown', 'Lobby End']")
-    course_phases_timed = models.CharField(max_length=500, blank=True, default="['Warmup', 'Push', 'Cooldown']")
+    course_phases_timed = models.CharField(max_length=500, blank=True, default="['Warmup', 'Push', 'Intensity', 'Cooldown']")
     course_phases_nontimed = models.CharField(max_length=500, blank=True, default="['Lobby Start', 'Lobby End']")
     course_starttime = models.DateTimeField(default=timezone.now)
     course_runtime = models.IntegerField(default=0)
