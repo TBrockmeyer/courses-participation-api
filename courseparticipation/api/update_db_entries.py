@@ -56,76 +56,81 @@ class DbEntriesUpdate:
 
         """
 
-        # TODO: [UCT - tests] Move all old tests to new test design with setUp fixture
         # TODO: [UCT - cleanup] delete old course runtime update VIEW?
-        # TODO: [UCT - imple] call class CourseUpdateRuntime whenever a transition is happening, or participation newly created, or courses view requested
+        # TODO: 1 [UCT - imple] call class CourseUpdateRuntime whenever a transition is happening, or participation newly created, or courses view requested
         # TODO: [UCT - imple] write an endpoint to retrieve the course_runtime_formatted
-        # TODO: [UCT - permissions] change the permissions for this update_course_time class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
-        # TODO: [UCT - refac] refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
+        # TODO: todelete [UCT - permissions] change the permissions for this update_course_time class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
+        # TODO: todelete [UCT - refac] refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
         # └─ rename _lobby and _nonlobby to _nontimed and _timed
-        # TODO: [UCT - refac] simplify everything below, by passing the requested and existing phases from view.py
-        # TODO: [UCT - refac] rename existing_course_ by relevant_course_
+        # TODO: todelete [UCT - refac] simplify everything below, by passing the requested and existing phases from view.py
 
-        relevant_course_id = course_id_list[0]
-
-        relevant_course = Course.objects.filter(course_id=relevant_course_id)
-        relevant_course_starttime = relevant_course.values()[0]['course_starttime']
-        relevant_course_phases = eval(relevant_course.values()[0]['course_phases'])
-        relevant_course_phases_timed = eval(relevant_course.values()[0]['course_phases_timed'])
-        relevant_course_phases_nontimed = eval(relevant_course.values()[0]['course_phases_nontimed'])
-
-        number_users_lobby = 0
-
-        for phase in relevant_course_phases_nontimed:
-            phase_index = relevant_course_phases.index(phase)
-            number_users_lobby += int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index).values())))
-
-        number_users_course = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id).values())))
-        number_users_nonlobby = number_users_course - number_users_lobby
-
-        phase_index_first_timed = relevant_course_phases.index(relevant_course_phases_timed[0]) if len(relevant_course_phases_timed) > 0 else 0
-        number_users_phase_first_timed = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index_first_timed).values()))) if len(relevant_course_phases_timed) > 0 else 0
-
-        date_format_datetime = '%Y-%m-%d %H:%M:%S'
-        date_format_timezone = 'Y-m-d H:i:s'
-
-        if(number_users_phase_first_timed == 1 and number_users_nonlobby == 1 and reset_runtime):
-            # "There is exactly one user inside the first timed phase of the course, and the requested course_runtime is 0"
-            # Whenever a user switches from phase 0 ('Lobby Start') to phase 1 ('Warmup'),
-            # the update call tries to indicate that this is a "runtime reset" call,
-            # i.e. that it's the first user entering and thus starting the course.
-            # We follow this indication only if there are no other users anywhere in the course,
-            # except for the first lobby phase ('Lobby Start').
-            # Set course_starttime to now.
-            # Set course-runtime to 0.
-            course_starttime = timezone.now()
-            course_runtime = 0
-            course_runtime_formatted = display_time(course_runtime)
-            Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
-        
-
-        elif(number_users_nonlobby == 0):
-            # "There are no users in the non-lobby phases of the course"
-            # This describes e.g. the cases where
-            # ├─ a list of the courses is requested, and no user is inside the course
-            # └─ the last user just left the course
-            # Set course_starttime to 0000-00-00T00:00:00Z
-            # Set course_runtime to 0
-            course_starttime = relevant_course_starttime
-            course_runtime = 0
-            course_runtime_formatted = display_time(course_runtime)
-            Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
-
+        if(len(course_id_list) > 0):
+            pass
         else:
-            # "There are already/still users in the non-lobby phases of the course, and no reset_runtime is requested"
-            # Set course_starttime to existing course_starttime
-            # Set (update) course_runtime to timediff between now and course_starttime
-            current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)
-            course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(relevant_course_starttime, date_format_datetime), date_format_datetime)
-            timediff = int((current_time - course_starttime).total_seconds())
-            course_starttime = relevant_course_starttime
-            course_runtime = timediff
-            course_runtime_formatted = display_time(course_runtime)
-            Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
+            return None
+
+        for i in range(0, len(course_id_list)):
+            relevant_course_id = course_id_list[i]
+
+            relevant_course = Course.objects.filter(course_id=relevant_course_id)
+            relevant_course_starttime = relevant_course.values()[0]['course_starttime']
+            relevant_course_runtime = relevant_course.values()[0]['course_runtime']
+            relevant_course_phases = eval(relevant_course.values()[0]['course_phases'])
+            relevant_course_phases_timed = eval(relevant_course.values()[0]['course_phases_timed'])
+            relevant_course_phases_nontimed = eval(relevant_course.values()[0]['course_phases_nontimed'])
+
+            number_users_lobby = 0
+
+            for phase in relevant_course_phases_nontimed:
+                phase_index = relevant_course_phases.index(phase)
+                number_users_lobby += int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index).values())))
+
+            number_users_course = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id).values())))
+            number_users_nonlobby = number_users_course - number_users_lobby
+
+            phase_index_first_timed = relevant_course_phases.index(relevant_course_phases_timed[0]) if len(relevant_course_phases_timed) > 0 else 0
+            number_users_phase_first_timed = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index_first_timed).values()))) if len(relevant_course_phases_timed) > 0 else 0
+
+            date_format_datetime = '%Y-%m-%d %H:%M:%S'
+            date_format_timezone = 'Y-m-d H:i:s'
+
+            if(number_users_phase_first_timed == 1 and number_users_nonlobby == 1 and reset_runtime):
+                # "There is exactly one user inside the first timed phase of the course, and the requested course_runtime is 0"
+                # Whenever a user switches from phase 0 ('Lobby Start') to phase 1 ('Warmup'),
+                # the update call tries to indicate that this is a "runtime reset" call,
+                # i.e. that it's the first user entering and thus starting the course.
+                # We follow this indication only if there are no other users anywhere in the course,
+                # except for the first lobby phase ('Lobby Start').
+                # Set course_starttime to now.
+                # Set course-runtime to 0.
+                course_starttime = timezone.now()
+                course_runtime = 0
+                course_runtime_formatted = display_time(course_runtime)
+                Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
+            
+
+            elif(number_users_nonlobby == 0):
+                # "There are no users in the non-lobby phases of the course"
+                # This describes e.g. the cases where
+                # ├─ a list of the courses is requested, and no user is inside the course
+                # └─ the last user just left the course
+                # Set course_starttime to 0000-00-00T00:00:00Z
+                # Set course_runtime to 0
+                course_starttime = relevant_course_starttime
+                course_runtime = relevant_course_runtime
+                course_runtime_formatted = display_time(course_runtime)
+                Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
+
+            else:
+                # "There are already/still users in the non-lobby phases of the course, and no reset_runtime is requested"
+                # Set course_starttime to existing course_starttime
+                # Set (update) course_runtime to timediff between now and course_starttime
+                current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)
+                course_starttime = datetime.datetime.strptime(datetime.datetime.strftime(relevant_course_starttime, date_format_datetime), date_format_datetime)
+                timediff = int((current_time - course_starttime).total_seconds())
+                course_starttime = relevant_course_starttime
+                course_runtime = timediff
+                course_runtime_formatted = display_time(course_runtime)
+                Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
 
 

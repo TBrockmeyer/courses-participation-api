@@ -27,7 +27,7 @@ from django.utils import timezone, dateformat
 
 import datetime
 
-# TODO: [General - imple] check if all classes are compatible with UI, i.e. if there's a button "create" or "destroy" if applicable. Otherwise change & rewrite view types
+# TODO: 5 [General - imple] check if all classes are compatible with UI, i.e. if there's a button "create" or "destroy" if applicable. Otherwise change & rewrite view types
 
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
@@ -41,6 +41,14 @@ class CourseList(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        # Update the course_runtime information
+        db_entries_update = DbEntriesUpdate()
+        course_id_list = []
+        for item in list(Course.objects.all().values()):
+            course_id_list.append(item['course_id'])
+        db_entries_update.update_course_time(course_id_list, False)
+
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -69,8 +77,8 @@ class ParticipationCreation(generics.CreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
-    # TODO: [Course - imple] ensure that the Course objects are aware of their participations (e.g. through dicts or json)
+    # TODO: 2 [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
+    # TODO: todelete [Course - imple] (delete "Participations" field) ensure that the Course objects are aware of their participations (e.g. through dicts or json)
     """
     Check given user_id: does have existing participation?
     ├─ No ► Create new participation with requested user_id, course_id and course_phase
@@ -90,6 +98,15 @@ class ParticipationCreation(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         existing_participation = Participation.objects.filter(user_id=self.get_relevant_user_id())
+        relevant_course_id = request.data['participation_course_id']
+
+        relevant_course = Course.objects.filter(course_id=relevant_course_id)
+        relevant_course_phases = eval(relevant_course.values()[0]['course_phases'])
+        relevant_course_phases_timed = eval(relevant_course.values()[0]['course_phases_timed'])
+        relevant_course_phases_nontimed = eval(relevant_course.values()[0]['course_phases_nontimed'])
+
+        requested_course_phase = int(request.data['participation_course_phase'])
+        requested_course_phase_name = relevant_course_phases[requested_course_phase]
 
         # Ensure that only one participation may exist per user
         if (existing_participation.count() > 0):
@@ -97,7 +114,7 @@ class ParticipationCreation(generics.CreateAPIView):
             raise exceptions.ValidationError(detail=message)
 
         # Ensure that the requested course phase is within the range of available course phases
-        requested_course = Course.objects.filter(course_id=request.data['participation_course_id'])
+        requested_course = Course.objects.filter(course_id=relevant_course_id)
         requested_course_phases = eval(requested_course.values()[0]['course_phases'])
         message_valid_course_phases = ""
         for i in range(0, len(requested_course_phases)):
@@ -111,6 +128,18 @@ class ParticipationCreation(generics.CreateAPIView):
 
         # Create the participation
         self.perform_create(serializer)
+
+        # Update the course_runtime information
+        db_entries_update = DbEntriesUpdate()
+        course_id_list = [relevant_course_id]
+        # If user changes from nonlobby to lobby phase, request reset_runtime (will be followed if no other users in nonlobby)
+        if(
+            (requested_course_phase_name in relevant_course_phases_timed)
+        ):
+            db_entries_update.update_course_time(course_id_list, True)
+        else:
+            db_entries_update.update_course_time(course_id_list, False)
+
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -124,8 +153,8 @@ class ParticipationUpdate(generics.UpdateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
-    # TODO: [Participation - refac] rename all test_participation_phase to test_participation_phase_id, and then test_participation_phase_name to test_participation_phase
+    # TODO: 3 [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
+    # TODO: 4 [Participation - refac] rename all test_participation_phase to test_participation_phase_id, and then test_participation_phase_name to test_participation_phase
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -158,7 +187,6 @@ class ParticipationUpdate(generics.UpdateAPIView):
         # Call runtime update, ONLY with reset_runtime=True IF phase before was nontimed, and new phase is timed.
         course_id_list = [existing_participation_course_id]
         db_entries_update = DbEntriesUpdate()
-        # TODO: [ParticipationUpdate - imple] Case distinction: phase before (non-)lobby, phase requested (non-)lobby
         # If user changes from nonlobby to lobby phase, request reset_runtime (will be followed if no other users in nonlobby)
         if(
             (requested_course_phase_name in relevant_course_phases_timed and existing_participation_course_phase_name in relevant_course_phases_nontimed)
