@@ -56,12 +56,11 @@ class DbEntriesUpdate:
 
         """
 
-        # TODO: [UCT - tests] Write test cases for all possible combinations of users distributed over the course phases (lobby / non-lobby / no users at all)
-        # and for each combination, all possible transitions (from lobby to non-lobby, directly into lobby, directly into non-lobby, directly from non-lobby out (harsh exit / kicked))
+        # TODO: [UCT - tests] Move all old tests to new test design with setUp fixture
         # TODO: [UCT - cleanup] delete old course runtime update VIEW?
-        # TODO: [UCT - imple] call class CourseUpdateRuntime whenever a transition is happening or courses view requested
+        # TODO: [UCT - imple] call class CourseUpdateRuntime whenever a transition is happening, or participation newly created, or courses view requested
         # TODO: [UCT - imple] write an endpoint to retrieve the course_runtime_formatted
-        # TODO: [UCT - permissions] change the permissions for this class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
+        # TODO: [UCT - permissions] change the permissions for this update_course_time class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
         # TODO: [UCT - refac] refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
         # └─ rename _lobby and _nonlobby to _nontimed and _timed
         # TODO: [UCT - refac] simplify everything below, by passing the requested and existing phases from view.py
