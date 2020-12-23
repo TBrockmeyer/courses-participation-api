@@ -125,6 +125,7 @@ class ParticipationUpdate(generics.UpdateAPIView):
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
     # TODO: [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
+    # TODO: [Participation - refac] rename all test_participation_phase to test_participation_phase_id, and then test_participation_phase_name to test_participation_phase
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
