@@ -281,7 +281,7 @@ class TestApiParticipationUpdate(APITestCase):
         response = self.create_test_participation_update_response(self.test_user_2, participation_2_id, participation_course_id, participation_course_phase)
         course_object_values_post_2 = Course.objects.filter(course_id=participation_course_id).values()[0]
         self.assertEqual(course_object_values_post_2['course_starttime'], course_object_values_post['course_starttime'])
-        self.assertEqual(course_object_values_post_2['course_runtime'], delay_user_1_entering + delay_user_2_entering)
+        self.assertEqual(course_object_values_post_2['course_runtime'], delay_user_2_entering)
 
         # Participation update with
         # ├─ first user being in a nonlobby phase
