@@ -191,11 +191,12 @@ class TestApiParticipationUpdate(APITestCase):
         self.test_phases_timed = get_test_phases_timed()
         self.test_course_1 = create_test_course_response(self.test_admin, 'Test Course 1 Participation Update', self.test_phases, self.test_phases_nontimed, self.test_phases_timed)
         self.test_course_2 = create_test_course_response(self.test_admin, 'Test Course 2 Participation Update', self.test_phases, self.test_phases_nontimed, self.test_phases_timed)
-        self.test_participation_course_phase_initial = 0
+        self.test_participation_course_phase_initial_nontimed = eval(self.test_phases).index(eval(self.test_phases_nontimed)[0])
+        self.test_participation_course_phase_initial_timed = eval(self.test_phases).index(eval(self.test_phases_timed)[0])
         self.test_participation = create_test_participation_response(
             self.test_user,
             self.test_course_1.data['course_id'],
-            self.test_participation_course_phase_initial
+            self.test_participation_course_phase_initial_nontimed
         )
 
     # Only allow jumps between course phases in participation updates, but not jumps in courses
@@ -210,6 +211,86 @@ class TestApiParticipationUpdate(APITestCase):
         response_c = create_test_participation_update_response(self.test_user, self.test_participation.data['participation_id'], self.test_course_2.data['course_id'], 1)
         self.assertEqual(response_c.status_code, status.HTTP_400_BAD_REQUEST)
 
+class TestApiParticipationCreationRuntimeUpdate(APITestCase):
+    # Test fixtures
+    def setUp(self):
+        self.test_admin = auth_test_admin()
+        self.test_user_1 = auth_test_user()
+        self.test_user_2 = auth_test_user()
+        self.test_user_3 = auth_test_user()
+        self.test_phases = get_test_phases()
+        self.test_phases_nontimed = get_test_phases_nontimed()
+        self.test_phases_timed = get_test_phases_timed()
+        self.test_course = create_test_course_response(self.test_admin, 'Test Course Participation', self.test_phases, self.test_phases_nontimed, self.test_phases_timed)
+        self.test_participation_course_phase_initial_nontimed = eval(self.test_phases).index(eval(self.test_phases_nontimed)[0])
+        self.test_participation_course_phase_initial_timed = eval(self.test_phases).index(eval(self.test_phases_timed)[0])
+
+    # Test methods
+    def test_participation_creation_runtime_update(self):
+        # Participation creation with
+        # ├─ first user entering a nontimed phase
+        # should
+        # ├─ not update course_starttime
+        # └─ not update course_runtime
+        self.test_participation_1_phase_nontimed = create_test_participation_response(
+            self.test_user_1,
+            self.test_course.data['course_id'],
+            self.test_participation_course_phase_initial_nontimed
+        )
+
+        participation_1_id = self.test_participation_1_phase_nontimed.data['participation_id']
+        participation_course_id = self.test_participation_1_phase_nontimed.data['participation_course_id']
+
+        course_object_values_pre = Course.objects.filter(course_id=participation_course_id).values()[0]
+        delay_user_1_entering = 1.0
+        time.sleep(delay_user_1_entering)
+        response = create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, self.test_participation_course_phase_initial_nontimed)
+        course_object_values_post = Course.objects.filter(course_id=participation_course_id).values()[0]
+
+        self.assertEqual(course_object_values_post['course_starttime'], course_object_values_pre['course_starttime'])
+        self.assertEqual(course_object_values_post['course_runtime'], course_object_values_pre['course_runtime'])
+
+        # TODO: complete this test
+        # Participation creation with
+        # ├─ second user entering a timed phase
+        # should
+        # ├─ update course_starttime
+        # └─ update course_runtime by specified delay_user_2_entering
+        participation_course_id = self.test_course.data['course_id']
+
+        course_object_values_pre = Course.objects.filter(course_id=participation_course_id).values()[0]
+        delay_user_2_entering = 1.0
+        time.sleep(delay_user_2_entering)
+        # TODO: switch asserted passed time to this: delay_user_2_entering = 1.0, do time.sleep(delay_user_2_entering), then do a Course View to update runtime
+        response = create_test_participation_response(self.test_user_2, participation_course_id, self.test_participation_course_phase_initial_timed)
+        course_object_values_post = Course.objects.filter(course_id=participation_course_id).values()[0]
+
+        self.assertNotEqual(course_object_values_post['course_starttime'], course_object_values_pre['course_starttime'])
+        self.assertEqual(course_object_values_post['course_runtime'], course_object_values_pre['course_runtime'])
+
+        # TODO: complete this test
+        # Participation creation with
+        # ├─ third user entering a timed phase
+        # should
+        # ├─ not update course_starttime
+        # └─ update course_runtime by specified delay_user_3_entering
+        self.test_participation_3_phase_timed = create_test_participation_response(
+            self.test_user_3,
+            self.test_course.data['course_id'],
+            self.test_participation_course_phase_initial_timed
+        )
+
+        participation_3_id = self.test_participation_3_phase_timed.data['participation_id']
+        participation_course_id = self.test_participation_3_phase_timed.data['participation_course_id']
+
+        course_object_values_pre = Course.objects.filter(course_id=participation_course_id).values()[0]
+        delay_user_3_entering = 1.0
+        time.sleep(delay_user_3_entering)
+        response = create_test_participation_update_response(self.test_user_3, participation_3_id, participation_course_id, self.test_participation_course_phase_initial_timed)
+        course_object_values_post = Course.objects.filter(course_id=participation_course_id).values()[0]
+
+        self.assertEqual(course_object_values_post['course_starttime'], course_object_values_pre['course_starttime'])
+        self.assertEqual(course_object_values_post['course_runtime'], course_object_values_pre['course_runtime'] + delay_user_3_entering)
 
 class TestApiParticipationRuntimeUpdate(APITestCase):
     # Test fixtures
@@ -221,16 +302,17 @@ class TestApiParticipationRuntimeUpdate(APITestCase):
         self.test_phases_nontimed = get_test_phases_nontimed()
         self.test_phases_timed = get_test_phases_timed()
         self.test_course = create_test_course_response(self.test_admin, 'Test Course Participation', self.test_phases, self.test_phases_nontimed, self.test_phases_timed)
-        self.test_participation_course_phase_initial = 0
+        self.test_participation_course_phase_initial_nontimed = eval(self.test_phases).index(eval(self.test_phases_nontimed)[0])
+        self.test_participation_course_phase_initial_timed = eval(self.test_phases).index(eval(self.test_phases_timed)[0])
         self.test_participation = create_test_participation_response(
             self.test_user_1,
             self.test_course.data['course_id'],
-            self.test_participation_course_phase_initial
+            self.test_participation_course_phase_initial_nontimed
         )
         self.test_participation_2 = create_test_participation_response(
             self.test_user_2,
             self.test_course.data['course_id'],
-            self.test_participation_course_phase_initial
+            self.test_participation_course_phase_initial_nontimed
         )
 
     # Test methods
@@ -238,31 +320,31 @@ class TestApiParticipationRuntimeUpdate(APITestCase):
         participation_1_id = self.test_participation.data['participation_id']
         participation_2_id = self.test_participation_2.data['participation_id']
         participation_course_id = self.test_participation.data['participation_course_id']
-        participation_course_phase = 1
 
         # Participation update with
         # ├─ first user entering a lobby phase
         # should
         # ├─ not update course_starttime
-        # └─ not update course_runtime
+        # └─ update course_runtime to delay_user_1_entering
         course_object_values_pre = Course.objects.filter(course_id=participation_course_id).values()[0]
-        delay_user_1_entering = 1.0
+        delay_user_1_entering = 0.0
         time.sleep(delay_user_1_entering)
-        response = create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, self.test_participation_course_phase_initial)
+        response = create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, self.test_participation_course_phase_initial_nontimed)
+        # TODO: switch asserted passed time to this: delay_user_1_entering = 1.0, do time.sleep(delay_user_1_entering), then do a Course View to update runtime
         course_object_values_post = Course.objects.filter(course_id=participation_course_id).values()[0]
 
         self.assertEqual(course_object_values_post['course_starttime'], course_object_values_pre['course_starttime'])
-        self.assertEqual(course_object_values_post['course_runtime'], 0)
+        self.assertEqual(course_object_values_post['course_runtime'], delay_user_1_entering)
 
         # Participation update with
         # ├─ first user entering a nonlobby phase
         # should
         # ├─ update course_starttime
-        # └─ not update course_runtime
+        # └─ set course_runtime to 0
         course_object_values_pre = Course.objects.filter(course_id=participation_course_id).values()[0]
         delay_user_1_entering = 1.0
         time.sleep(delay_user_1_entering)
-        response = create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, participation_course_phase)
+        response = create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, self.test_participation_course_phase_initial_timed)
         course_object_values_post = Course.objects.filter(course_id=participation_course_id).values()[0]
 
         self.assertNotEqual(course_object_values_post['course_starttime'], course_object_values_pre['course_starttime'])
@@ -273,9 +355,10 @@ class TestApiParticipationRuntimeUpdate(APITestCase):
         # should
         # ├─ not update course_starttime
         # └─ update course_runtime to specified delay_user_2_entering
-        delay_user_2_entering = 1.0
+        delay_user_2_entering = 0.0
+        # TODO: switch asserted passed time to this: delay_user_2_entering = 1.0, do time.sleep(delay_user_2_entering), then do a Course View to update runtime
         time.sleep(delay_user_2_entering)
-        response = create_test_participation_update_response(self.test_user_2, participation_2_id, participation_course_id, participation_course_phase)
+        response = create_test_participation_update_response(self.test_user_2, participation_2_id, participation_course_id, self.test_participation_course_phase_initial_timed)
         course_object_values_post_2 = Course.objects.filter(course_id=participation_course_id).values()[0]
         self.assertEqual(course_object_values_post_2['course_starttime'], course_object_values_post['course_starttime'])
         self.assertEqual(course_object_values_post_2['course_runtime'], delay_user_2_entering)
@@ -289,22 +372,25 @@ class TestApiParticipationRuntimeUpdate(APITestCase):
         # └─ update course_runtime to specified delay_user_2_entering + delay_user_2_exiting
         delay_user_2_exiting = 1.0
         time.sleep(delay_user_2_exiting)
-        response = create_test_participation_update_response(self.test_user_2, participation_2_id, participation_course_id, self.test_participation_course_phase_initial)
+        response = create_test_participation_update_response(self.test_user_2, participation_2_id, participation_course_id, self.test_participation_course_phase_initial_timed)
         course_object_values_post_3 = Course.objects.filter(course_id=participation_course_id).values()[0]
         self.assertEqual(course_object_values_post_3['course_starttime'], course_object_values_post_2['course_starttime'])
         self.assertEqual(course_object_values_post_3['course_runtime'], delay_user_2_entering + delay_user_2_exiting)
 
         # Participation update with
+        # ├─ first user being in a nonlobby phase
         # ├─ first user entering a lobby phase
+        # ├─ no other user being in a nonlobby phase
         # should
         # ├─ not update course_starttime
-        # └─ update course_runtime to 0
-        delay_user_1_exiting = 1.0
+        # └─ achieve that course_runtime stays at its former value (timer halted)
+        delay_user_1_exiting = 0.0
         time.sleep(delay_user_1_exiting)
-        response = create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, self.test_participation_course_phase_initial)
+        # TODO: switch asserted passed time to this: delay_user_1_exiting = 1.0, do time.sleep(delay_user_1_exiting), then do a Course View which should not update runtime
+        response = create_test_participation_update_response(self.test_user_1, participation_1_id, participation_course_id, self.test_participation_course_phase_initial_nontimed)
         course_object_values_post_4 = Course.objects.filter(course_id=participation_course_id).values()[0]
         self.assertEqual(course_object_values_post_4['course_starttime'], course_object_values_post_3['course_starttime'])
-        self.assertEqual(course_object_values_post_4['course_runtime'], 0)
+        self.assertEqual(course_object_values_post_4['course_runtime'], course_object_values_post_3['course_runtime'] + delay_user_1_exiting)
 
 
 if __name__ == '__main__':
