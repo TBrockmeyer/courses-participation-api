@@ -134,6 +134,17 @@ class ParticipationUpdate(generics.UpdateAPIView):
 
         existing_participation = Participation.objects.filter(participation_id=kwargs['pk'])
         existing_participation_course_id = existing_participation.values()[0]['participation_course_id_id']
+        existing_participation_course_phase = existing_participation.values()[0]['participation_course_phase']
+
+        relevant_course = Course.objects.filter(course_id=existing_participation_course_id)
+        relevant_course_phases = eval(relevant_course.values()[0]['course_phases'])
+        relevant_course_phases_timed = eval(relevant_course.values()[0]['course_phases_timed'])
+        relevant_course_phases_nontimed = eval(relevant_course.values()[0]['course_phases_nontimed'])
+
+        requested_course_phase = int(request.data['participation_course_phase'])
+        requested_course_phase_name = relevant_course_phases[requested_course_phase]
+
+        existing_participation_course_phase_name = relevant_course_phases[existing_participation_course_phase]
 
         # Ensure that users may only jump between course phases within one course
         if(int(request.data['participation_course_id']) != existing_participation_course_id):
@@ -148,8 +159,13 @@ class ParticipationUpdate(generics.UpdateAPIView):
         db_entries_update = DbEntriesUpdate()
         # TODO: [ParticipationUpdate - imple] Case distinction: phase before (non-)lobby, phase requested (non-)lobby
         # If user changes from nonlobby to lobby phase, request reset_runtime (will be followed if no other users in nonlobby)
-        db_entries_update.update_course_time(course_id_list, True)
-        # Else, do not request reset_runtime
+        if(
+            (requested_course_phase_name in relevant_course_phases_timed and existing_participation_course_phase_name in relevant_course_phases_nontimed)
+        ):
+            db_entries_update.update_course_time(course_id_list, True)
+        # Otherwise, do not request reset_runtime
+        else:
+            db_entries_update.update_course_time(course_id_list, False)
 
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
