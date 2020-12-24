@@ -93,7 +93,6 @@ class ParticipationCreation(generics.CreateAPIView):
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
     # TODO: 2 [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
-    # TODO: todelete [Course - imple] (delete "Participations" field) ensure that the Course objects are aware of their participations (e.g. through dicts or json)
     """
     Check given user_id: does have existing participation?
     ├─ No ► Create new participation with requested user_id, course_id and course_phase

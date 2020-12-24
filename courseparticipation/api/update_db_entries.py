@@ -57,11 +57,8 @@ class DbEntriesUpdate:
         """
 
         # TODO: [UCT - cleanup] delete old course runtime update VIEW?
-        # TODO: 1 [UCT - imple] call class CourseUpdateRuntime whenever a transition is happening, or participation newly created, or courses view requested
         # TODO: [UCT - imple] write an endpoint to retrieve the course_runtime_formatted
-        # TODO: todelete [UCT - permissions] change the permissions for this update_course_time class to "IsAdminUser", and ensure that those methods calling it internally set the request.user.is_staff to True
-        # TODO: todelete [UCT - refac] refine the configurability of the phases: timed or not timed? --> number_users_lobby and number_users_nonlobby will depend on that
-        # └─ rename _lobby and _nonlobby to _nontimed and _timed
+        # TODO: [UCT - leanup] rename _lobby and _nonlobby to _nontimed and _timed
         # TODO: todelete [UCT - refac] simplify everything below, by passing the requested and existing phases from view.py
 
         if(len(course_id_list) > 0):

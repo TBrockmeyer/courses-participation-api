@@ -22,7 +22,7 @@ from rest_framework.test import APIRequestFactory, APITestCase, APISimpleTestCas
 
 import time
 
-# TODO: [Tests - refac] rename all test_participation_phase to test_participation_phase_id, and then test_participation_phase_name to test_participation_phase
+# TODO: 4 [Tests - refac] rename all test_participation_phase to test_participation_phase_id, and then test_participation_phase_name to test_participation_phase
 # TODO: [Tests - clean] delete unused method create_test_course_runtime_update_response
 
 # Global helper methods
