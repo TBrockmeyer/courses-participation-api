@@ -1,6 +1,6 @@
 import unittest
 
-from api.views import UserList, CourseList, ParticipationCreation, ParticipationList, ParticipationUpdate, CourseUpdateRuntime
+from api.views import UserList, CourseList, ParticipationCreation, ParticipationList, ParticipationUpdate
 from api.models import Course, Participation
 
 from api.generate_db_entries import DbEntriesCreation
@@ -23,7 +23,6 @@ from rest_framework.test import APIRequestFactory, APITestCase, APISimpleTestCas
 import time
 
 # TODO: 4 [Tests - refac] rename all test_participation_phase to test_participation_phase_id, and then test_participation_phase_name to test_participation_phase
-# TODO: [Tests - clean] delete unused method create_test_course_runtime_update_response
 
 # Global helper methods
 def auth_test_admin():
@@ -82,15 +81,6 @@ def get_test_course_response(user):
     request = factory.get('/courses/')
     force_authenticate(request, user=user)
     return view(request)
-
-"""
-def create_test_course_runtime_update_response(user, course_id, course_runtime=-1):
-    view = CourseUpdateRuntime.as_view()
-    factory = APIRequestFactory()
-    request = factory.put('', {'course_id': course_id, 'course_runtime': course_runtime})
-    force_authenticate(request, user=user)
-    return view(request, pk=str(course_id))
-"""
 
 class TestApiCoursesList(APITestCase):
     # Helper methods

@@ -56,7 +56,6 @@ class DbEntriesUpdate:
 
         """
 
-        # TODO: [UCT - cleanup] delete old course runtime update VIEW?
         # TODO: [UCT - imple] write an endpoint to retrieve the course_runtime_formatted
         # TODO: [UCT - leanup] rename _lobby and _nonlobby to _nontimed and _timed
         # TODO: todelete [UCT - refac] simplify everything below, by passing the requested and existing phases from view.py
