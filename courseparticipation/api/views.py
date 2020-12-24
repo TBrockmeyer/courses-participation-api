@@ -34,13 +34,18 @@ class CourseList(generics.ListCreateAPIView):
     serializer_class = CourseSerializer
     permission_classes = [IsAdminOrReadOnly]
 
-    def perform_create(self, serializer):
-        # Owner may be defined e.g. through serializer.save(owner=self.request.user)
-        serializer.save()
+    """
+    List a queryset. (Overridden from rest_framework/mixins.py)
+    """
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
 
         # Update the course_runtime information
         db_entries_update = DbEntriesUpdate()
@@ -48,6 +53,16 @@ class CourseList(generics.ListCreateAPIView):
         for item in list(Course.objects.all().values()):
             course_id_list.append(item['course_id'])
         db_entries_update.update_course_time(course_id_list, False)
+
+        return Response(serializer.data)
+
+    def perform_create(self, serializer):
+        # Owner may be defined e.g. through serializer.save(owner=self.request.user)
+        serializer.save()
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -388,7 +403,7 @@ class ParticipationList(generics.ListAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     """
-    List a queryset.
+    List a queryset. (Overridden from rest_framework/mixins.py)
     """
 
     def list(self, request, *args, **kwargs):
