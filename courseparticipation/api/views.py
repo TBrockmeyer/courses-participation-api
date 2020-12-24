@@ -120,25 +120,24 @@ class ParticipationCreation(generics.CreateAPIView):
         relevant_course_phases_nontimed = eval(relevant_course.values()[0]['course_phases_nontimed'])
 
         requested_course_phase = int(request.data['participation_course_phase'])
-        requested_course_phase_name = relevant_course_phases[requested_course_phase]
+        try:
+            requested_course_phase_name = relevant_course_phases[requested_course_phase]
+        except:
+            # Ensure that the requested course phase is within the range of available course phases
+            message_valid_course_phases = ""
+            for i in range(0, len(relevant_course_phases)):
+                message_valid_course_phases += str(i) + ": '" + relevant_course_phases[i] + ("', " if i != len(relevant_course_phases)-1 else "'. ")
+            message_course_phase_invalid_value = "The requested course phase is not one of the available phases: " + \
+                message_valid_course_phases + \
+                "Provide one of the integer numbers, e.g. participation_course_phase=0 for phase " + \
+                "'" + relevant_course_phases[0] + "'"
+            if (int(request.data['participation_course_phase']) not in [p for p in range(0, len(relevant_course_phases))]):
+                raise exceptions.ValidationError(detail=message_course_phase_invalid_value)
 
         # Ensure that only one participation may exist per user
         if (existing_participation.count() > 0):
             message = "A Participation for this user_id already exists. Delete unwanted participation first by calling participations/delete/."
             raise exceptions.ValidationError(detail=message)
-
-        # Ensure that the requested course phase is within the range of available course phases
-        requested_course = Course.objects.filter(course_id=relevant_course_id)
-        requested_course_phases = eval(requested_course.values()[0]['course_phases'])
-        message_valid_course_phases = ""
-        for i in range(0, len(requested_course_phases)):
-            message_valid_course_phases += str(i) + ": '" + requested_course_phases[i] + ("', " if i != len(requested_course_phases)-1 else "'. ")
-        message_course_phase_invalid_value = "The requested course phase is not one of the available phases: " + \
-            message_valid_course_phases + \
-            "Provide one of the integer numbers, e.g. participation_course_phase=0 for phase " + \
-            "'" + requested_course_phases[0] + "'"
-        if (int(request.data['participation_course_phase']) not in [p for p in range(0, len(requested_course_phases))]):
-            raise exceptions.ValidationError(detail=message_course_phase_invalid_value)
 
         # Create the participation
         self.perform_create(serializer)
@@ -167,7 +166,7 @@ class ParticipationUpdate(generics.UpdateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: 3 [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
+    # TODO: 2 [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
     # TODO: 4 [Participation - refac] rename all test_participation_phase to test_participation_phase_id, and then test_participation_phase_name to test_participation_phase
 
     def update(self, request, *args, **kwargs):
@@ -186,7 +185,19 @@ class ParticipationUpdate(generics.UpdateAPIView):
         relevant_course_phases_nontimed = eval(relevant_course.values()[0]['course_phases_nontimed'])
 
         requested_course_phase = int(request.data['participation_course_phase'])
-        requested_course_phase_name = relevant_course_phases[requested_course_phase]
+        try:
+            requested_course_phase_name = relevant_course_phases[requested_course_phase]
+        except:
+            # Ensure that the requested course phase is within the range of available course phases
+            message_valid_course_phases = ""
+            for i in range(0, len(relevant_course_phases)):
+                message_valid_course_phases += str(i) + ": '" + relevant_course_phases[i] + ("', " if i != len(relevant_course_phases)-1 else "'. ")
+            message_course_phase_invalid_value = "The requested course phase is not one of the available phases: " + \
+                message_valid_course_phases + \
+                "Provide one of the integer numbers, e.g. participation_course_phase=0 for phase " + \
+                "'" + relevant_course_phases[0] + "'"
+            if (int(request.data['participation_course_phase']) not in [p for p in range(0, len(relevant_course_phases))]):
+                raise exceptions.ValidationError(detail=message_course_phase_invalid_value)
 
         existing_participation_course_phase_name = relevant_course_phases[existing_participation_course_phase]
 
