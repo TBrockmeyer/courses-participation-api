@@ -163,7 +163,7 @@ class ParticipationCreation(generics.CreateAPIView):
         serializer.save(user_id=self.get_relevant_user_id())
 
 
-class ParticipationUpdate(generics.UpdateAPIView):
+class ParticipationUpdate(generics.RetrieveUpdateAPIView):
     queryset = Participation.objects.all()
     serializer_class = ParticipationSerializer
     permission_classes = [IsOwnerOrAdmin]
