@@ -56,8 +56,6 @@ class DbEntriesUpdate:
 
         """
 
-        # TODO: [UCT - imple] write an endpoint to retrieve the course_runtime_formatted
-        # TODO: [UCT - imple] write an endpoint to create users
         # TODO: [UCT - leanup] rename _lobby and _nonlobby to _nontimed and _timed
 
         if(len(course_id_list) > 0):
