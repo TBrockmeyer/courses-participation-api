@@ -28,6 +28,8 @@ from django.utils import timezone, dateformat
 import datetime
 
 # TODO: 5 [General - imple] check if all classes are compatible with UI, i.e. if there's a button "create" or "destroy" if applicable. Otherwise change & rewrite view types
+# TODO: 6 [General - imple] create a Heroku / etc. instance of this API
+# TODO: 7 [General - imple] create a cover page that explains login variants, and behind the login wall: links to the pages where objects can be viewed / created / destroyed
 # TODO: [UCT - imple] write an endpoint to retrieve the course_runtime_formatted
 # TODO: [UCT - imple] write an endpoint to create users
 
