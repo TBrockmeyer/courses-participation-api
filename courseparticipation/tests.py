@@ -22,8 +22,6 @@ from rest_framework.test import APIRequestFactory, APITestCase, APISimpleTestCas
 
 import time
 
-# TODO: 4 [Tests - refac] rename all test_participation_phase to test_participation_phase_id, and then test_participation_phase_name to test_participation_phase
-
 # Global helper methods
 def auth_test_admin():
     auth_username_admin = "test_admin"

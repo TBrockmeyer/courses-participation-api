@@ -91,8 +91,7 @@ class ParticipationCreation(generics.CreateAPIView):
     serializer_class = ParticipationSerializer
     permission_classes = [IsOwnerOrAdmin]
 
-    # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: 2 [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
+    # Users call this endpoint indicating a participation_course_id and a participation_course_phase.
     """
     Check given user_id: does have existing participation?
     ├─ No ► Create new participation with requested user_id, course_id and course_phase
@@ -167,7 +166,6 @@ class ParticipationUpdate(generics.UpdateAPIView):
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
     # TODO: 2 [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
-    # TODO: 4 [Participation - refac] rename all test_participation_phase to test_participation_phase_id, and then test_participation_phase_name to test_participation_phase
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
