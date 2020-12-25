@@ -11,7 +11,6 @@ class Course(models.Model):
     course_starttime = models.DateTimeField(default=timezone.now)
     course_runtime = models.IntegerField(default=0)
     course_runtime_formatted = models.CharField(max_length=50, blank=True, default="00:00")
-    participations = models.CharField(max_length=100, blank=True, default='')
     
     def save(self, *args, **kwargs):
         super(Course, self).save(*args, **kwargs)
