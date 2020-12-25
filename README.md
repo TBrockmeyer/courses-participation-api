@@ -10,7 +10,73 @@ Simple web API for managing course participations, according to these rough requ
 - allow entering and exiting courses
 - allow visibility of participation in courses
 
-# How to use it
+### ---------------------------------------
+
+# How to use it (if using the UI via TODO: provide URL)
+
+## Login as admin
+- username: [provided in personal message]
+- password: [provided in personal message]
+
+## Create courses
+Go to http://127.0.0.1:8000/courses/create/ and create courses
+
+## Delete courses
+Go to http://127.0.0.1:8000/courses/admindelete/1/ and delete the first course you created (or any other course you don't want to keep)
+
+## View all courses
+Go to http://127.0.0.1:8000/courses/ and view all courses
+
+## View all users
+Go to http://127.0.0.1:8000/users/ and view all users
+
+## Log out, and login as user
+Login with e.g. the following redentials:
+- username: user_2
+- password: user2_pw
+Or
+- username: user_3
+- password: user3_pw
+or any other user ... users user_2 to user_5 are pre-created
+
+## View all courses
+Go to http://127.0.0.1:8000/courses/ and view all courses and the available phases. Remember the index of a timed phase of one course in the list of all phases; e.g. remember "2" if the timed phases are "['Welcome', 'Push']" and all phases are "['Lobby Start', 'Welcome', 'Push', 'Lobby End']" ("Push" in position 2 among 0,1,2,3)
+
+## Create a course participation
+Go to http://127.0.0.1:8000/participations/create/ and create a participation. Provide the index of the course phase you want to enter. Provide the index of a timed participation (e.g. "2") if course timers shall start.
+
+## View your existing participation
+Go to http://127.0.0.1:8000/participations and view your existing participation. Empty if none. Remember your participation_id if available.
+
+## Update your participation
+Go to http://127.0.0.1:8000/participations/update/1 to update your participation (replace 1 by your participation_id if necessary)
+
+## Delete your participation
+Go to http://127.0.0.1:8000/participations/delete/ to delete your participation in the course. Click on the red button "DELETE" to delete it.
+
+## Create a course participation again
+Go to http://127.0.0.1:8000/participations/create/ and create a participation again, as before.
+
+## Wait a few seconds. View all courses
+Go to http://127.0.0.1:8000/courses/ and view all courses. Note that the course_runtime and course_runtime_formatted now also show some seconds passed.
+
+## Log out, and login as admin
+As before:
+- username: [provided in personal message]
+- password: [provided in personal message]
+
+## View all existing participations
+Go to http://127.0.0.1:8000/participations and view all existing participations. Remember the participation_id of the user you want to kick
+
+## Kick a user from the course
+Go to http://127.0.0.1:8000/participations/admindelete/2 to delete participation 2 (or replace "2" with any other participation_id)
+
+## Repeat to see course_runtime field changes
+Repeat the steps from logging in as a user, creating a participation, updating between timed and nontimed phases to see the effects on the course_runtime fields. Timer will stop if no users are in timed phases anymore, and reset itself if users enter timed phases again.
+
+### ---------------------------------------
+
+# How to use it (if cloning the repository to local and executing commands via command line)
 ## Set up your environment
 - clone the repo
 - cd into the folder "courseparticipation"
