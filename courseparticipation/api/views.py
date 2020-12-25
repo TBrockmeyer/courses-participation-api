@@ -29,7 +29,6 @@ import datetime
 
 # TODO: 6 [General - imple] create a Heroku / etc. instance of this API
 # TODO: 7 [General - imple] create a cover page that explains login variants, and behind the login wall: links to the pages where objects can be viewed / created / destroyed
-# TODO: [UCT - imple] write an endpoint to create users
 
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
