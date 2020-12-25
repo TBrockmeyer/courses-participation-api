@@ -265,8 +265,12 @@ class ParticipationDeletionByAdmin(generics.DestroyAPIView):
         """
         Returns the object the view is displaying.
         """
-        # Ensure that returned object belongs to requesting user
-        queryset = Participation.objects.filter(user_id=request.data['user_id'])
+        # Ensure that returned object belongs to user in request
+        try:
+            queryset = Participation.objects.filter(user_id=request.data['user_id'])
+        except KeyError:
+            message_user_id_required = "Please provide the user_id relevant for the participation to your request, e.g. user_id=1"
+            raise exceptions.ValidationError(detail=message_user_id_required)
 
         filter_kwargs = {}
         obj = generics.get_object_or_404(queryset, **filter_kwargs)
