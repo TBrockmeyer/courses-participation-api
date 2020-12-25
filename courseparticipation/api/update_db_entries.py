@@ -47,7 +47,7 @@ class DbEntriesUpdate:
         """
         Update the fields course_starttime, course_runtime, course_runtime_formatted.
         This method needs to be called each time after one of the following views is returned:
-        ├─ CourseList (url: courses/) (all courses are listed) (r if request.data['participation_course_phase'] in nonlobby phases)
+        ├─ CourseList (url: courses/) (all courses are listed) (r if request.data['participation_course_phase'] in timed phases)
         ├─ ParticipationCreation (url: participations/create/) (user enters course)
         ├─ ParticipationDeletion (url: participations/delete/) (user leaves course)
         ├─ ParticipationDeletionByAdmin (url: participations/admindelete/) (user is kicked from course by admin)
@@ -55,8 +55,6 @@ class DbEntriesUpdate:
         (r: reset_runtime = True)
 
         """
-
-        # TODO: [UCT - leanup] rename _lobby and _nonlobby to _nontimed and _timed
 
         if(len(course_id_list) > 0):
             pass
@@ -73,14 +71,14 @@ class DbEntriesUpdate:
             relevant_course_phases_timed = eval(relevant_course.values()[0]['course_phases_timed'])
             relevant_course_phases_nontimed = eval(relevant_course.values()[0]['course_phases_nontimed'])
 
-            number_users_lobby = 0
+            number_users_nontimed = 0
 
             for phase in relevant_course_phases_nontimed:
                 phase_index = relevant_course_phases.index(phase)
-                number_users_lobby += int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index).values())))
+                number_users_nontimed += int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index).values())))
 
             number_users_course = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id).values())))
-            number_users_nonlobby = number_users_course - number_users_lobby
+            number_users_timed = number_users_course - number_users_nontimed
 
             phase_index_first_timed = relevant_course_phases.index(relevant_course_phases_timed[0]) if len(relevant_course_phases_timed) > 0 else 0
             number_users_phase_first_timed = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index_first_timed).values()))) if len(relevant_course_phases_timed) > 0 else 0
@@ -88,13 +86,13 @@ class DbEntriesUpdate:
             date_format_datetime = '%Y-%m-%d %H:%M:%S'
             date_format_timezone = 'Y-m-d H:i:s'
 
-            if(number_users_phase_first_timed == 1 and number_users_nonlobby == 1 and reset_runtime):
+            if(number_users_phase_first_timed == 1 and number_users_timed == 1 and reset_runtime):
                 # "There is exactly one user inside the first timed phase of the course, and the requested course_runtime is 0"
                 # Whenever a user switches from phase 0 ('Lobby Start') to phase 1 ('Warmup'),
                 # the update call tries to indicate that this is a "runtime reset" call,
                 # i.e. that it's the first user entering and thus starting the course.
                 # We follow this indication only if there are no other users anywhere in the course,
-                # except for the first lobby phase ('Lobby Start').
+                # except for the firstnontimed phase ('Lobby Start').
                 # Set course_starttime to now.
                 # Set course-runtime to 0.
                 course_starttime = timezone.now()
@@ -103,8 +101,8 @@ class DbEntriesUpdate:
                 Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
             
 
-            elif(number_users_nonlobby == 0):
-                # "There are no users in the non-lobby phases of the course"
+            elif(number_users_timed == 0):
+                # "There are no users in the timed phases of the course"
                 # This describes e.g. the cases where
                 # ├─ a list of the courses is requested, and no user is inside the course
                 # └─ the last user just left the course
@@ -116,7 +114,7 @@ class DbEntriesUpdate:
                 Course.objects.filter(course_id=relevant_course_id).update(course_starttime=course_starttime, course_runtime=course_runtime, course_runtime_formatted=course_runtime_formatted)
 
             else:
-                # "There are already/still users in the non-lobby phases of the course, and no reset_runtime is requested"
+                # "There are already/still users in the timed phases of the course, and no reset_runtime is requested"
                 # Set course_starttime to existing course_starttime
                 # Set (update) course_runtime to timediff between now and course_starttime
                 current_time = datetime.datetime.strptime(dateformat.format(timezone.now(), date_format_timezone), date_format_datetime)

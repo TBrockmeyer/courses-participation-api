@@ -324,7 +324,7 @@ class TestApiParticipationRuntimeUpdate(APITestCase):
         participation_course_id = self.test_participation.data['participation_course_id']
 
         # Participation update with
-        # ├─ first user entering a lobby phase
+        # ├─ first user entering a nontimed phase
         # should
         # ├─ not update course_starttime
         # └─ update course_runtime to delay_user_1_entering
@@ -338,7 +338,7 @@ class TestApiParticipationRuntimeUpdate(APITestCase):
         self.assertEqual(course_object_values_post['course_runtime'], delay_user_1_entering)
 
         # Participation update with
-        # ├─ first user entering a nonlobby phase
+        # ├─ first user entering a timed phase
         # should
         # ├─ update course_starttime
         # └─ set course_runtime to 0
@@ -352,7 +352,7 @@ class TestApiParticipationRuntimeUpdate(APITestCase):
         self.assertEqual(course_object_values_post['course_runtime'], 0)
 
         # Participation update with
-        # ├─ second user entering a nonlobby phase
+        # ├─ second user entering a timed phase
         # should
         # ├─ not update course_starttime
         # └─ update course_runtime to specified delay_user_2_entering
@@ -364,9 +364,9 @@ class TestApiParticipationRuntimeUpdate(APITestCase):
         self.assertEqual(course_object_values_post_2['course_runtime'], delay_user_2_entering)
 
         # Participation update with
-        # ├─ first user being in a nonlobby phase
-        # ├─ second user being in a nonlobby phase
-        # ├─ second user entering a lobby phase
+        # ├─ first user being in a timed phase
+        # ├─ second user being in a timed phase
+        # ├─ second user entering a nontimed phase
         # should
         # ├─ not update course_starttime
         # └─ update course_runtime to specified delay_user_2_entering + delay_user_2_exiting
@@ -378,9 +378,9 @@ class TestApiParticipationRuntimeUpdate(APITestCase):
         self.assertEqual(course_object_values_post_3['course_runtime'], delay_user_2_entering + delay_user_2_exiting)
 
         # Participation update with
-        # ├─ first user being in a nonlobby phase
-        # ├─ first user entering a lobby phase
-        # ├─ no other user being in a nonlobby phase
+        # ├─ first user being in a timed phase
+        # ├─ first user entering a nontimed phase
+        # ├─ no other user being in a timed phase
         # should
         # ├─ not update course_starttime
         # └─ achieve that course_runtime stays at its former value (timer halted)

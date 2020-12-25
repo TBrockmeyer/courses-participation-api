@@ -148,7 +148,7 @@ class ParticipationCreation(generics.CreateAPIView):
         # Update the course_runtime information
         db_entries_update = DbEntriesUpdate()
         course_id_list = [relevant_course_id]
-        # If user changes from nonlobby to lobby phase, request reset_runtime (will be followed if no other users in nonlobby)
+        # If user changes from timed to nontimed phase, request reset_runtime (will be followed if no other users in timed)
         if(
             (requested_course_phase_name in relevant_course_phases_timed)
         ):
@@ -212,7 +212,7 @@ class ParticipationUpdate(generics.UpdateAPIView):
         # Call runtime update, ONLY with reset_runtime=True IF phase before was nontimed, and new phase is timed.
         course_id_list = [existing_participation_course_id]
         db_entries_update = DbEntriesUpdate()
-        # If user changes from nonlobby to lobby phase, request reset_runtime (will be followed if no other users in nonlobby)
+        # If user changes from timed to nontimed phase, request reset_runtime (will be followed if no other users in timed)
         if(
             (requested_course_phase_name in relevant_course_phases_timed and existing_participation_course_phase_name in relevant_course_phases_nontimed)
         ):
