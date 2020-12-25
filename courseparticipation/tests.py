@@ -148,14 +148,25 @@ class TestApiParticipationCreation(APITestCase):
         self.test_phases = get_test_phases()
         self.test_phases_nontimed = get_test_phases_nontimed()
         self.test_phases_timed = get_test_phases_timed()
-        self.test_participation_phase = 0
+        self.test_participation_course_phase_initial_nontimed = eval(self.test_phases).index(eval(self.test_phases_nontimed)[0])
+        self.test_participation_course_phase_subsequent_nontimed = eval(self.test_phases).index(eval(self.test_phases_nontimed)[1])
+        self.test_participation_course_phase_beyond_limits = len(eval(self.test_phases_timed)) + 2
+
+    ## Only allow to create course participations within the range of allowed course phases
+    def test_participation_creation_offlimits(self):
+        # Create test course as reference
+        response_course_creation = create_test_course_response(self.test_admin, 'Test Course Participation', self.test_phases, self.test_phases_nontimed, self.test_phases_timed)
+        # Set requested phase to two beyond maximum allowed phase
+        # Participation creation by test user should get status code 400
+        response = create_test_participation_response(self.test_user, response_course_creation.data['course_id'], self.test_participation_course_phase_beyond_limits)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     ## Only allow users or admins to create course participations
     def test_permission_participation_creation(self):
         # Create test course as reference
         response_course_creation = create_test_course_response(self.test_admin, 'Test Course Participation', self.test_phases, self.test_phases_nontimed, self.test_phases_timed)
         # Participation creation by test user should get status code 201
-        response = create_test_participation_response(self.test_user, response_course_creation.data['course_id'], 0)
+        response = create_test_participation_response(self.test_user, response_course_creation.data['course_id'], self.test_participation_course_phase_initial_nontimed)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     ## Only allow users or admins to view user-specific course participations
@@ -163,7 +174,7 @@ class TestApiParticipationCreation(APITestCase):
         # Create test course as reference
         response_course_creation = create_test_course_response(self.test_admin, 'Test Course Participation', self.test_phases, self.test_phases_nontimed, self.test_phases_timed)
         # Create test participation
-        response_participation_creation = create_test_participation_response(self.test_user, response_course_creation.data['course_id'], 4)
+        response_participation_creation = create_test_participation_response(self.test_user, response_course_creation.data['course_id'], self.test_participation_course_phase_subsequent_nontimed)
         # Get participation view response
         response = get_test_participation_response(self.test_user)
         # Participation view response by test user should only show one participation
