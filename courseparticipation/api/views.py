@@ -28,6 +28,8 @@ from django.utils import timezone, dateformat
 import datetime
 
 # TODO: 5 [General - imple] check if all classes are compatible with UI, i.e. if there's a button "create" or "destroy" if applicable. Otherwise change & rewrite view types
+# TODO: [UCT - imple] write an endpoint to retrieve the course_runtime_formatted
+# TODO: [UCT - imple] write an endpoint to create users
 
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
@@ -165,8 +167,6 @@ class ParticipationUpdate(generics.UpdateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     # Users call this endpoint indicating a participation_course_id and a Participation_course_phase.
-    # TODO: 2 [Participation - imple] allow only participation_course_phase within the range of allowed phases of the specific course
-
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
