@@ -263,33 +263,6 @@ class ParticipationDeletionByAdmin(generics.DestroyAPIView):
     serializer_class = ParticipationSerializer
     permission_classes = [IsAdminUser]
 
-    def get_object(self, request):
-        """
-        Returns the object the view is displaying.
-        """
-        # Ensure that returned object belongs to user in request
-        try:
-            queryset = Participation.objects.filter(user_id=request.data['user_id'])
-        except KeyError:
-            message_user_id_required = "Please provide the user_id relevant for the participation to your request, e.g. user_id=1"
-            raise exceptions.ValidationError(detail=message_user_id_required)
-
-        filter_kwargs = {}
-        obj = generics.get_object_or_404(queryset, **filter_kwargs)
-
-        # May raise a permission denied
-        self.check_object_permissions(self.request, obj)
-
-        return obj
-
-    """
-    Destroy a model instance. (Overridden from rest_framework/mixins.py)
-    """
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object(self.request)
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 class ParticipationList(generics.ListAPIView):
     queryset = Participation.objects.all()
