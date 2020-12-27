@@ -24,7 +24,7 @@ import time
 
 # Global helper methods
 def auth_test_admin():
-    auth_admin_unique_string = "test_admin" + str(int(round(time.time() * 1000)))
+    auth_admin_unique_string = "test_admin_" + str(int(round(time.time() * 1000)))
     auth_username_admin = auth_admin_unique_string
     auth_password_admin = auth_admin_unique_string
     DbEntriesCreation().create_user_admin(auth_username_admin, auth_password_admin)
