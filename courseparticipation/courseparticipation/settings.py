@@ -94,6 +94,7 @@ DATABASES = {
 """
 
 # Set PostgreSQL database for Heroku, as in https://devcenter.heroku.com/articles/heroku-postgresql#connecting-with-django
+DATABASES = {}
 DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
 
