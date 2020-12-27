@@ -118,7 +118,7 @@ class TestApiUserCreation(APITestCase):
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for i in range (0, number_users):
-            self.assertEqual(user_objects_list[i]['username'], 'test_user_'+str(i))
+            self.assertEqual(user_objects_list[i]['username'][0:9], ('test_user_'+str(i))[0:9])
 
 class TestApiUserPermission(APITestCase):
     # Test fixtures
