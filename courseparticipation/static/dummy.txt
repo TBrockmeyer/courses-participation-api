@@ -1,2 +1,0 @@
-# Empty file, to ensure folder persistence in GitHub
-# The /static/ folder is needed for Heroku to store its static files
