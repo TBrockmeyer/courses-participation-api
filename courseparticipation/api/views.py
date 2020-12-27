@@ -87,6 +87,31 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 
 
+class UserAdminCreation(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    """
+    Create a model instance. (Overridden from rest_framework/mixins.py)
+
+    Usage example: http POST <localhost>/users/create/admin username="admin" password="admin"
+    """
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        # Replace now-created admin user by a new admin user with the given password
+        User.objects.filter(username=request.data['username']).delete()
+        user=User.objects.create_user(username=request.data['username'], password=request.data['password'])
+        user.is_superuser=True
+        user.is_staff=True
+        user.save()
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
 class ParticipationCreation(generics.CreateAPIView):
     queryset = Participation.objects.all()
     serializer_class = ParticipationSerializer
