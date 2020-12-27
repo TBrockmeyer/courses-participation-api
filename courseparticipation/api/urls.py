@@ -8,6 +8,7 @@ urlpatterns = [
     path('courses/admindelete/<int:pk>/', views.CourseDeletionByAdmin.as_view()),
     path('users/', views.UserList.as_view()),
     path('users/<int:pk>/', views.UserDetail.as_view()),
+    path('users/create/admin/', views.UserAdminCreation.as_view()),
     path('participations/', views.ParticipationList.as_view()),
     path('participations/create/', views.ParticipationCreation.as_view()),
     path('participations/update/<int:pk>/', views.ParticipationUpdate.as_view()),
