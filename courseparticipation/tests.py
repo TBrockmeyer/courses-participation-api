@@ -106,7 +106,7 @@ class TestApiUserCreation(APITestCase):
         request = factory.get('/users/')
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.test_admin.username, 'test_admin')
+        self.assertEqual(self.test_admin.username[0:10], 'test_admin')
 
     def test_user_creation_10_users_list(self):
         view = UserList.as_view()
