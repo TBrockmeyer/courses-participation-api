@@ -1,1 +1,1 @@
-web: gunicorn courseparticipation.wsgi --log-file -
+web: gunicorn chdir /courseparticipation courseparticipation.wsgi --log-file -
