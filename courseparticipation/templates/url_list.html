@@ -1,0 +1,77 @@
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <style>
+        body {
+            /*background-color: lightblue;*/
+            background-image: linear-gradient(to bottom right, rgb(97, 74, 161), rgb(63, 192, 224));
+        }
+        #div-card {
+            background-color: white;
+            opacity: 1;
+            margin-top: 50 !important;
+        }
+        .table {
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+
+<html>
+    <body>
+        <div class="container">
+            <div class="card border-0 shadow my-5" id="div-card">
+              <div class="card-body p-5">
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8"><h2 class="font-weight-light">Backend Engineer - Coding Challenge</h2></div>
+                    <div class="col-md-2"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4"><h1>API URLs and usage</h1></div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10"><h3>First Step: login</h3></div>
+                    <div class="col-md-1"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10"><p>Go to <a href="https://course-participation-api.herokuapp.com/api-auth/login/?next=/courses/">https://course-participation-api.herokuapp.com/api-auth/login/?next=/courses/</a> and login with the credentials provided by your contact via email.</p></div>
+                    <div class="col-md-1"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10"><h3>Now use these URLs to create and delete courses, users, course participations...</h3></div>
+                    <div class="col-md-1"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-10">
+                        <table class="table">
+                            <tr>
+                                <th>Description</th>
+                                <th>URL & Default field values</th>
+                            </tr>
+                            {% for purpose in purposes %}
+                            <tr>
+                                <td class="col-md-3">{{ purpose.description }}</td>
+                                <td><a target="_blank" rel="noopener noreferrer" href={{ purpose.url }}>{{ purpose.url }}</a></td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 8pt;"><b>Example:</b></td>
+                                <td>{{ purpose.example }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+                <div style="height: 200px"></div>
+                <h4>End of the page</h4>
+              </div>
+            </div>
+          </div>
+    </body>
+</html>
