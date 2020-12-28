@@ -61,7 +61,13 @@
                             <table class="table">
                                 <tr>
                                     <td class="col-md-3"><b>URL</b></td>
-                                    <td><a target="_blank" rel="noopener noreferrer" href={{ purpose.url }}>{{ purpose.url }}</a></td>
+                                    {% if '/1/' in purpose.url %}
+                                        <td>{{ purpose.url }}</td>
+                                    {% elif '/2/' in purpose.url %}
+                                        <td>{{ purpose.url }}</td>
+                                    {% else %}
+                                        <td><a target="_blank" rel="noopener noreferrer" href={{ purpose.url }}>{{ purpose.url }}</a></td>
+                                    {% endif %}
                                 </tr>
                                 {% if purpose.example %}
                                 <tr>
