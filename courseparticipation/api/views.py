@@ -40,16 +40,58 @@ class UrlList(APIView):
     template_name = 'url_list.html'
 
     def get(self, request):
+        description_admin_login = "Go to the login URL and login with the credentials provided by your contact via email."
+        example_admin_login = "username: admin_2021 [valid value provided in personal message]\npassword: admin_2021 [valid value provided in personal message]"
+        description_course_creation = "Create courses with course title and the timed and non-timed phases of the course ('non-timed' meaning: the timer is halted if all course participants are only in a non-timed phase).\nPlease find an example how to define the course phases below. Open the URL, enter the example details and click the 'POST' button to create the new course. You can leave the course_runtime fields empty or fill them; please note that they will only be updated as soon as users start participating in the course (handled further below)."
+        example_course_creation = "Course title: Course 5\nCourse phases: ['Lobby Start', 'Welcome', 'Push', 'Lobby End']\nCourse phases timed: ['Welcome', 'Push']\nCourse phases nontimed: ['Lobby Start', 'Lobby End']"
+        description_course_list_admin = "View a list of all courses."
+        example_course_list_admin = False
+        description_course_deletion = "Delete one of the courses you just created (or any other course you don't want to keep). Determine the course_id of your course with the course list endpoint introduced above, and replace the '2' in the URL with it. After opening the URL, click the 'DELETE' button to actually delete the course."
+        example_course_deletion = False
+        description_user_list = "View a list of all users."
+        example_user_list = False
+        description_user_creation = "Create new users. For this demo, the password will be the same as the username you're entering. Open the URL, enter the example details and click the 'POST' button to create the new user."
+        example_user_creation = "Username: user_6\n(Password [will be set automatically, doesn\'t have a UI field]: user_6)"
+        description_user_login = "Log out, and login again as a normal user, e.g. with the credentials from the example, or any other user. Users user_2 to user_5 have been pre-created."
+        example_user_login = "Username: user_2\nPassword: user_2"
+        description_course_list_user = "View all courses and the available phases. For the step below, remember already now the course_id (e.g. '3') of the course you'd like to participate in, and the index of a timed phase in the list of all phases of the course; e.g. remember '2' if the timed phases are ['Welcome', 'Push'] and all phases are ['Lobby Start', 'Welcome', 'Push', 'Lobby End'].\nWhy is '2' a valid index of a timed phase? Because 'Push' is in position 2 among the indices of all course phases (0: 'Lobby Start', 1: 'Welcome', 2: 'Push', 3: 'Lobby End'), and phase 2: 'Push' is a timed phase."
+        example_course_list_user = False
+        description_participation_creation = "Create a course participation for the logged-in user. Provide the course_id of the course you want to enter (e.g. '3'), and provide the index of a timed participation (e.g. '2') so that course timers start. Open the URL, enter the example details and click the 'POST' button to create the new participation."
+        example_participation_creation = "Participation course id: Course object (3) [this is the course with the course ID 3]\nParticipation course phase: 2 [or the index of any timed phase you remembered from the course]"
+        description_course_list_timer = "Wait a few seconds. Then open URL and view all courses. Note that the course_runtime and course_runtime_formatted for the course you're participating in now also show some seconds passed. Reload page to verify (course_runtime_formatted always updated to its current number of seconds runtime)."
+        example_course_list_timer = "{\"course_id\": 3,\n\"course_title\": \"Course 3\",\n\"course_phases\": \"['Lobby Start', 'Welcome', 'Push', 'Lobby End']\",\n\"course_phases_timed\": \"['Welcome', 'Push']\",\n\"course_phases_nontimed\": \"['Lobby Start', 'Lobby End']\",\n\"course_starttime\": \"2021-01-03T13:43:38.539444Z\",\n\"course_runtime\": 10,\n\"course_runtime_formatted\": \"00:10\"}"
+        description_participation_list = "View your existing participation. Empty if no participation created yet. Remember your participation_id if available."
+        example_participation_list = False
+        description_participation_update = "Update your participation (replace '1' in the URL by your participation_id if necessary). For participation_course_phase, enter the index of a non-timed phase (e.g. '0')."
+        example_participation_update = "Participation course phase: 0"
+        description_course_list_timer_paused = "View all courses. Note that the course_runtime and course_runtime_formatted for the course you're participating in now show a paused timer. Reload page to verify (course_runtime_formatted persists at its paused number of seconds runtime)."
+        example_course_list_timer_paused = False
+        description_participation_deletion_user = "Delete your participation in the course. Open the URL, and click on the red button 'DELETE' to delete it. View your participations again to verify that it has been deleted."
+        example_participation_deletion_user = False
+        description_admin_login_2 = "Logout, go to the login URL and login again with the credentials provided by your contact via email."
+        example_admin_login_2 = "username: admin_2021 [valid value provided in personal message]\npassword: admin_2021 [valid value provided in personal message]"
+        description_participation_deletion_admin = "Would you like to remove a user from the course? View all participations. Go to admin delete URL listed below. Delete e.g. participation with participation_id 2 (or replace '2' with any other valid participation_id)."
+        example_participation_deletion_admin = "Participation id: 2"
+
         base_url = "https://course-participation-api.herokuapp.com/"
         url_dict = [
-            {'title': 'Course creation', 'description': '-description-', 'url': base_url + 'courses/', 'example': '-example-'},
-            {'title': 'Course deletion by logged-in admin', 'description': '-description-', 'url': base_url + 'courses/admindelete/1/', 'example': '-example-'},
-            {'title': 'Users list', 'description': '-description-', 'url': base_url + 'users/', 'example': '-example-'},
-            {'title': 'Participation list', 'description': '-description-', 'url': base_url + 'participations/', 'example': '-example-'},
-            {'title': 'Participation creation', 'description': '-description-', 'url': base_url + 'participations/create/', 'example': '-example-'},
-            {'title': 'Participation update', 'description': '-description-', 'url': base_url + 'participations/update/1/', 'example': '-example-'},
-            {'title': 'Participation deletion\n by logged-in user', 'description': '-description-', 'url': base_url + 'participations/delete/', 'example': '-example-'},
-            {'title': 'Participation deletion\n by logged-in admin', 'description': '-description-', 'url': base_url + 'participations/admindelete/1/', 'example': '-example-'},
+            {'title': 'Admin login', 'description': description_admin_login, 'url': base_url + 'api-auth/login/?next=/courses/', 'example': example_admin_login},
+            {'title': 'Course creation', 'description': description_course_creation, 'url': base_url + 'courses/', 'example': example_course_creation},
+            {'title': 'Course list', 'description': description_course_list_admin, 'url': base_url + 'courses/', 'example': example_course_list_admin},
+            {'title': 'Course deletion by logged-in admin', 'description': description_course_deletion, 'url': base_url + 'courses/admindelete/2/', 'example': example_course_deletion},
+            {'title': 'Users list', 'description': description_user_list, 'url': base_url + 'users/', 'example': example_user_list},
+            {'title': 'User creation', 'description': description_user_creation, 'url': base_url + 'users/', 'example': example_user_creation},
+            {'title': 'User login', 'description': description_user_login, 'url': base_url + 'api-auth/login/?next=/courses/', 'example': example_user_login},
+            {'title': 'Course list', 'description': description_course_list_user, 'url': base_url + 'courses/', 'example': example_course_list_user},
+            {'title': 'Participation creation', 'description': description_participation_creation, 'url': base_url + 'participations/create/', 'example': example_participation_creation},
+            {'title': 'Course list', 'description': description_course_list_timer, 'url': base_url + 'courses/', 'example': example_course_list_timer},
+            {'title': 'Participation list', 'description': description_participation_list, 'url': base_url + 'participations/', 'example': example_participation_list},
+            {'title': 'Participation update', 'description': description_participation_update, 'url': base_url + 'participations/update/1/', 'example': example_participation_update},
+            {'title': 'Course list', 'description': description_course_list_timer_paused, 'url': base_url + 'courses/', 'example': example_course_list_timer_paused},
+            {'title': 'Participation deletion\n by logged-in user', 'description': description_participation_deletion_user, 'url': base_url + 'participations/delete/', 'example': example_participation_deletion_user},
+            {'title': 'Participation creation', 'description': description_participation_creation, 'url': base_url + 'participations/create/', 'example': example_participation_creation},
+             {'title': 'Admin login', 'description': description_admin_login_2, 'url': base_url + 'api-auth/login/?next=/courses/', 'example': example_admin_login_2},
+            {'title': 'Participation deletion\n by logged-in admin', 'description': description_participation_deletion_admin, 'url': base_url + 'participations/admindelete/2/', 'example': example_participation_deletion_admin},
         ]
         return Response({'purposes': url_dict})
 
