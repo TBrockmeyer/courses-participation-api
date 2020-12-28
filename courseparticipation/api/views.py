@@ -192,7 +192,7 @@ class UserAdminCreation(generics.CreateAPIView):
 
         # If requested username matches expected md5 hash, and this admin user doesn't exist yet,
         # replace now-created admin user by a new admin user with the given password
-        allowed_hashes = ["212bd44fe9b6d0cd2b4a7a0431aef17a", "2d83d0b11cbf4bb666928410a22aa6ef"]
+        allowed_hashes = ["e31cf0d683bd526af09d77694b8d31de"]
         m = hashlib.md5()
         m.update(request.data['username'].encode('utf-8'))
         if(str(m.hexdigest()) in allowed_hashes):
