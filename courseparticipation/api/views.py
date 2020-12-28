@@ -72,7 +72,7 @@ class UrlList(APIView):
         description_step_iteration = "Go through the steps above again to create more users, courses, participations... and delete them again, and check the impact of these actions on course runtimes.\nIn the GitHub project, the logic behind the course runtime updates can be found inside class 'courseparticipation/api/update_db_entries.py', in the method 'update_course_time()'."
         example_step_iteration = False
 
-        base_url = "https://course-participation-api.herokuapp.com/"
+        base_url = "http://127.0.0.1:8000/"
         url_dict = [
             {'title': 'Admin login', 'description': description_admin_login, 'url': base_url + 'api-auth/login/?next=/courses/', 'example': example_admin_login},
             {'title': 'Course creation', 'description': description_course_creation, 'url': base_url + 'courses/', 'example': example_course_creation},
