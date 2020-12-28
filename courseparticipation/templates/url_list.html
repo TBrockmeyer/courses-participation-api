@@ -49,22 +49,20 @@
                 <div class="row">
                     <div class="col-md-1"></div>
                     <div class="col-md-10">
+                    {% for purpose in purposes %}
+                        <h4>{{ purpose.title }}</h4>
+                        <p>{{ purpose.description }}</p>
                         <table class="table">
                             <tr>
-                                <th>Description</th>
-                                <th>URL & Default field values</th>
-                            </tr>
-                            {% for purpose in purposes %}
-                            <tr>
-                                <td class="col-md-3">{{ purpose.description }}</td>
+                                <td class="col-md-3"><b>URL</b></td>
                                 <td><a target="_blank" rel="noopener noreferrer" href={{ purpose.url }}>{{ purpose.url }}</a></td>
                             </tr>
                             <tr>
-                                <td style="font-size: 8pt;"><b>Example:</b></td>
+                                <td><b>Example:</b></td>
                                 <td>{{ purpose.example }}</td>
                             </tr>
-                            {% endfor %}
                         </table>
+                    {% endfor %}
                     </div>
                     <div class="col-md-1"></div>
                 </div>

@@ -42,14 +42,14 @@ class UrlList(APIView):
     def get(self, request):
         base_url = "https://course-participation-api.herokuapp.com/"
         url_dict = [
-            {'description': 'Course creation', 'url': base_url + 'courses/', 'example': '-example-'},
-            {'description': 'Course deletion by logged-in admin', 'url': base_url + 'courses/admindelete/1/', 'example': '-example-'},
-            {'description': 'Users list', 'url': base_url + 'users/', 'example': '-example-'},
-            {'description': 'Participation list', 'url': base_url + 'participations/', 'example': '-example-'},
-            {'description': 'Participation creation', 'url': base_url + 'participations/create/', 'example': '-example-'},
-            {'description': 'Participation update', 'url': base_url + 'participations/update/1/', 'example': '-example-'},
-            {'description': 'Participation deletion\n by logged-in user', 'url': base_url + 'participations/delete/', 'example': '-example-'},
-            {'description': 'Participation deletion\n by logged-in admin', 'url': base_url + 'participations/admindelete/1/', 'example': '-example-'},
+            {'title': 'Course creation', 'description': '-description-', 'url': base_url + 'courses/', 'example': '-example-'},
+            {'title': 'Course deletion by logged-in admin', 'description': '-description-', 'url': base_url + 'courses/admindelete/1/', 'example': '-example-'},
+            {'title': 'Users list', 'description': '-description-', 'url': base_url + 'users/', 'example': '-example-'},
+            {'title': 'Participation list', 'description': '-description-', 'url': base_url + 'participations/', 'example': '-example-'},
+            {'title': 'Participation creation', 'description': '-description-', 'url': base_url + 'participations/create/', 'example': '-example-'},
+            {'title': 'Participation update', 'description': '-description-', 'url': base_url + 'participations/update/1/', 'example': '-example-'},
+            {'title': 'Participation deletion\n by logged-in user', 'description': '-description-', 'url': base_url + 'participations/delete/', 'example': '-example-'},
+            {'title': 'Participation deletion\n by logged-in admin', 'description': '-description-', 'url': base_url + 'participations/admindelete/1/', 'example': '-example-'},
         ]
         return Response({'purposes': url_dict})
 
