@@ -110,7 +110,7 @@ Repeat the steps from logging in as a user, creating a participation, updating b
 <br/>`pip install djangorestframework`
 - in a first terminal, cd into the parent folder of "courseparticipation" and do
 <br/>`python manage.py runserver`
-- in a second terminal, try out the commands below to interact with the API
+- in a second terminal, try out the commands below to interact with the API. Replace "http://127.0.0.1:8000/courses/" with your actual local URL indicated by the command line terminal after having started the local webserver via "python manage.py runserver".
 - if any requirement is missing, check out this link and follow the first steps until you have a running minimalistic API. Then use a similar configuration to run this API.
 <br/>https://www.django-rest-framework.org/tutorial/1-serialization/
 
