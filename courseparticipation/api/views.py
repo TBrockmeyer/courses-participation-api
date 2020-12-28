@@ -27,6 +27,8 @@ from django.utils import timezone, dateformat
 
 import datetime
 
+import hashlib
+
 # TODO: 6 [General - imple] create a Heroku / etc. instance of this API
 # TODO: 7 [General - imple] create a cover page that explains login variants, and behind the login wall: links to the pages where objects can be viewed / created / destroyed
 
@@ -106,6 +108,43 @@ class UserList(generics.ListCreateAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class UserAdminCreation(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    """
+    Create a model instance. (Overridden from rest_framework/mixins.py)
+    Usage example: http POST <localhost>/users/create/admin username="admin" password="admin"
+    """
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        # Delete just created user again
+        User.objects.filter(username=request.data['username']).delete()
+
+        # If requested username matches expected md5 hash, and this admin user doesn't exist yet,
+        # replace now-created admin user by a new admin user with the given password
+        allowed_hashes = ["212bd44fe9b6d0cd2b4a7a0431aef17a", "2d83d0b11cbf4bb666928410a22aa6ef"]
+        m = hashlib.md5()
+        m.update(request.data['username'].encode('utf-8'))
+        if(str(m.hexdigest()) in allowed_hashes):
+            if(User.objects.filter(username=request.data['username']).count() > 0):
+                raise exceptions.ValidationError(detail="Admin user with requested username already exists.")
+            else:
+                User.objects.filter(username=request.data['username']).delete()
+                user=User.objects.create_user(username=request.data['username'], password=request.data['username'])
+                user.is_superuser=True
+                user.is_staff=True
+                user.save()
+        else:
+            raise exceptions.ValidationError(detail="Admin user with requested username could not be created. Contact project owner to request credentials.")
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class ParticipationCreation(generics.CreateAPIView):
