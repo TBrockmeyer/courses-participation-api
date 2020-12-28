@@ -32,8 +32,7 @@ import datetime
 
 import hashlib
 
-# TODO: 6 [General - imple] create a Heroku / etc. instance of this API
-# TODO: 7 [General - imple] create a cover page that explains login variants, and behind the login wall: links to the pages where objects can be viewed / created / destroyed
+# TODO: 8 [General - imple] create a cover page that explains login variants, default field values
 
 
 class UrlList(APIView):
