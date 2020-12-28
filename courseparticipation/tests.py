@@ -104,6 +104,7 @@ class TestApiUserCreation(APITestCase):
         view = UserList.as_view()
         factory = APIRequestFactory()
         request = factory.get('/users/')
+        force_authenticate(request, user=self.test_admin)
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.test_admin.username[0:10], 'test_admin')
@@ -115,6 +116,7 @@ class TestApiUserCreation(APITestCase):
         user_objects_list = list(User.objects.filter(username__startswith="test_user_").all().values())
         factory = APIRequestFactory()
         request = factory.get('/users/')
+        force_authenticate(request, user=self.test_admin)
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for i in range (0, number_users):
