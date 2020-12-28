@@ -20,64 +20,72 @@
     <body>
         <div class="container">
             <div class="card border-0 shadow my-5" id="div-card">
-              <div class="card-body p-5">
-                <div class="row">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-8"><h2 class="font-weight-light">Backend Engineer - Coding Challenge</h2></div>
-                    <div class="col-md-2"></div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4"></div>
-                    <div class="col-md-4"><h1><u>GitHub project</u></h1></div>
-                    <div class="col-md-4"></div>
-                </div>
-                <div class="row">
-                    <div class="col-md-1"></div>
-                    <div class="col-md-10">
-                        <h3>Check out the branch 'main_heroku' for the code that this Heroku demo app is based on:</h3>
-                        <a target="_blank" rel="noopener noreferrer" href=https://github.com/TBrockmeyer/courses-participation-api/tree/main_heroku><img style="height: 40px" src=https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png></img>https://github.com/TBrockmeyer/courses-participation-api/tree/main_heroku</a>
+                <div class="card-body p-5">
+                    <div class="row">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-8"><h2 class="font-weight-light">Backend Engineer - Coding Challenge</h2></div>
+                        <div class="col-md-2"></div>
                     </div>
-                    <div class="col-md-1"></div>
-                </div>
-                <div class="row">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-8"><h1><u>Try the API: URLs and how-to-use</u></h1></div>
-                    <div class="col-md-2"></div>
-                </div>
-                <div class="row">
-                    <div class="col-md-1"></div>
-                    <div class="col-md-10">
-                        <h3>Follow this step-by-step guide to login, and create and delete courses, users, course participations...</h3>
-                        <p>Follow the <span style="border-style: solid;">options</span> below step-by-step. Read the explanation for each option, click on the URL and use the examples (if applicable) as guidances; explore what is behind each API URL.</p>
+                    <div class="row">
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4"><h1><u>GitHub project</u></h1></div>
+                        <div class="col-md-4"></div>
                     </div>
-                    <div class="col-md-1"></div>
-                </div>
-                <div class="row">
-                    <div class="col-md-1"></div>
-                    <div class="col-md-10">
-                    {% for purpose in purposes %}
-                        <h4 style="border-style: solid;"><b>{{ purpose.title }}</b></h4>
-                        <p>{{ purpose.description|linebreaksbr }}</p>
-                        <table class="table">
-                            <tr>
-                                <td class="col-md-3"><b>URL</b></td>
-                                <td><a target="_blank" rel="noopener noreferrer" href={{ purpose.url }}>{{ purpose.url }}</a></td>
-                            </tr>
-                            {% if purpose.example %}
-                            <tr>
-                                <td><b>Example:</b></td>
-                                <td>{{ purpose.example|linebreaksbr }}</td>
-                            </tr>
-                            {% endif %}
-                        </table>
-                    {% endfor %}
+                    <div class="row">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10">
+                            <h3>Check out the branch 'main_heroku' for the code that this Heroku demo app is based on:</h3>
+                            <a target="_blank" rel="noopener noreferrer" href=https://github.com/TBrockmeyer/courses-participation-api/tree/main_heroku><img style="height: 40px" src=https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png></img>https://github.com/TBrockmeyer/courses-participation-api/tree/main_heroku</a>
+                        </div>
+                        <div class="col-md-1"></div>
                     </div>
-                    <div class="col-md-1"></div>
+                    <div class="row">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-8"><h1><u>Try the API: URLs and how-to-use</u></h1></div>
+                        <div class="col-md-2"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10">
+                            <h3>Follow this step-by-step guide to login, and create and delete courses, users, course participations...</h3>
+                            <p>Follow the <span style="border-style: solid;">options</span> below step-by-step. Read the explanation for each option, click on the URL and use the examples (if applicable) as guidances; explore what is behind each API URL.</p>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10">
+                        {% for purpose in purposes %}
+                            <h4 style="border-style: solid;"><b>{{ purpose.title }}</b></h4>
+                            <p>{{ purpose.description|linebreaksbr }}</p>
+                            <table class="table">
+                                <tr>
+                                    <td class="col-md-3"><b>URL</b></td>
+                                    <td><a target="_blank" rel="noopener noreferrer" href={{ purpose.url }}>{{ purpose.url }}</a></td>
+                                </tr>
+                                {% if purpose.example %}
+                                <tr>
+                                    <td><b>Example:</b></td>
+                                    <td>{{ purpose.example|linebreaksbr }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        {% endfor %}
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-10">
+                            <h4>Have fun with the API!</h4>
+                            <img style="height: 150px" src="https://media.giphy.com/media/RbDKaczqWovIugyJmW/giphy.gif"></img>
+                        </div>
+                        <div class="col-md-1"></div>
+                    </div>
+                    <div style="height: 100px"></div>
+                        <h4>End of the page</h4>
+                    </div>
                 </div>
-                <div style="height: 200px"></div>
-                <h4>End of the page</h4>
-              </div>
-            </div>
           </div>
     </body>
 </html>

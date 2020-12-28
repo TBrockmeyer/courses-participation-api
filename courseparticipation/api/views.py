@@ -72,6 +72,8 @@ class UrlList(APIView):
         example_admin_login_2 = "username: admin_2021 [valid value provided in personal message]\npassword: admin_2021 [valid value provided in personal message]"
         description_participation_deletion_admin = "Would you like to remove a user from the course? View all participations. Go to admin delete URL listed below. Delete e.g. participation with participation_id 2 (or replace '2' with any other valid participation_id)."
         example_participation_deletion_admin = "Participation id: 2"
+        description_step_iteration = "Go through the steps above again to create more users, courses, participations... and delete them again, and check the impact of these actions on course runtimes.\nIn the GitHub project, the logic behind the course runtime updates can be found inside class 'courseparticipation/api/update_db_entries.py', in the method 'update_course_time()'."
+        example_step_iteration = False
 
         base_url = "https://course-participation-api.herokuapp.com/"
         url_dict = [
@@ -90,8 +92,9 @@ class UrlList(APIView):
             {'title': 'Course list', 'description': description_course_list_timer_paused, 'url': base_url + 'courses/', 'example': example_course_list_timer_paused},
             {'title': 'Participation deletion\n by logged-in user', 'description': description_participation_deletion_user, 'url': base_url + 'participations/delete/', 'example': example_participation_deletion_user},
             {'title': 'Participation creation', 'description': description_participation_creation, 'url': base_url + 'participations/create/', 'example': example_participation_creation},
-             {'title': 'Admin login', 'description': description_admin_login_2, 'url': base_url + 'api-auth/login/?next=/courses/', 'example': example_admin_login_2},
+            {'title': 'Admin login', 'description': description_admin_login_2, 'url': base_url + 'api-auth/login/?next=/courses/', 'example': example_admin_login_2},
             {'title': 'Participation deletion\n by logged-in admin', 'description': description_participation_deletion_admin, 'url': base_url + 'participations/admindelete/2/', 'example': example_participation_deletion_admin},
+            {'title': 'Step iteration', 'description': description_step_iteration, 'url': base_url + 'courses/', 'example': example_step_iteration},
         ]
         return Response({'purposes': url_dict})
 
