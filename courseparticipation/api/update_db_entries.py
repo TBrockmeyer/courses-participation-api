@@ -80,13 +80,10 @@ class DbEntriesUpdate:
             number_users_course = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id).values())))
             number_users_timed = number_users_course - number_users_nontimed
 
-            phase_index_first_timed = relevant_course_phases.index(relevant_course_phases_timed[0]) if len(relevant_course_phases_timed) > 0 else 0
-            number_users_phase_first_timed = int(len(list(Participation.objects.filter(participation_course_id=relevant_course_id, participation_course_phase=phase_index_first_timed).values()))) if len(relevant_course_phases_timed) > 0 else 0
-
             date_format_datetime = '%Y-%m-%d %H:%M:%S'
             date_format_timezone = 'Y-m-d H:i:s'
 
-            if(number_users_phase_first_timed == 1 and number_users_timed == 1 and reset_runtime):
+            if(number_users_timed == 1 and reset_runtime):
                 # "There is exactly one user inside the first timed phase of the course, and the requested course_runtime is 0"
                 # Whenever a user switches from phase 0 ('Lobby Start') to phase 1 ('Warmup'),
                 # the update call tries to indicate that this is a "runtime reset" call,
