@@ -4,6 +4,7 @@ from api import views
 from django.conf.urls import include
 
 urlpatterns = [
+    path('home/', views.UrlList.as_view()),
     path('courses/', views.CourseList.as_view()),
     path('courses/admindelete/<int:pk>/', views.CourseDeletionByAdmin.as_view()),
     path('users/', views.UserList.as_view()),
