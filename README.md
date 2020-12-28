@@ -188,6 +188,11 @@ Update own current course participation
 Exit course (delete own participation)
 <br/>`http -a user_2:user2_pw DELETE http://127.0.0.1:8000/participations/delete/`
 
+## For developers
+Additionally to the steps mentioned above, you can do the following as a developer:
+- modify the API and add tests in file `courseparticipation\tests.py`
+- run tests by cd'ing into the `courseparticipation` folder and running `python tests.py`
+
 # How to create it
 ## How to learn to create web APIs with Django
 Follow the web API tutorial on the Website of the Django Rest Framework.<br/>Start with Step 1 here: https://www.django-rest-framework.org/tutorial/1-serialization/
