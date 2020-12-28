@@ -101,9 +101,30 @@ class CourseDeletionByAdmin(generics.DestroyAPIView):
     
 
 # Add classes for the User models defined in django.contrib.auth.models
-class UserList(generics.ListAPIView):
+class UserList(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        # Delete just created user again
+        User.objects.filter(username=request.data['username']).delete()
+
+        if(User.objects.filter(username=request.data['username']).count() > 0):
+            raise exceptions.ValidationError(detail="User with requested username already exists.")
+        else:
+            User.objects.filter(username=request.data['username']).delete()
+            user=User.objects.create_user(username=request.data['username'], password=request.data['username'])
+            user.is_superuser=False
+            user.is_staff=False
+            user.save()
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class UserDetail(generics.RetrieveAPIView):
