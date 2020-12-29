@@ -162,6 +162,7 @@ Remove user from course
 ### Admin participation management
 Create participation for user
 <br/>`http -a admin:admin POST http://127.0.0.1:8000/participations/create/ participation_course_id=1 participation_course_phase=0 user_id=1`
+<br/>`http -a admin:admin POST http://127.0.0.1:8000/participations/create/ participation_course_id=1 participation_course_phase=1 user_id=1`
 
 Get all participations
 <br/>`http -a admin:admin GET http://127.0.0.1:8000/participations/`
