@@ -49,7 +49,7 @@ Log out, go to http://127.0.0.1:8000/api-auth/login/?next=/courses/ and login ag
 Login with e.g. the following credentials:
 - username: user_2
 - password: user_2
-Or
+<br/>or
 - username: user_3
 - password: user_3
 or any other user ... users user_2 to user_5 have been pre-created.
@@ -147,7 +147,7 @@ python manage.py shell
 ## For admins
 ### Admin course management
 Create Courses
-<br/>`http -a admin:admin POST http://127.0.0.1:8000/courses/ course_title="Course 1" course_phases="['Lobby', 'Welcome', 'Warmup']"`
+<br/>`http -a admin:admin POST http://127.0.0.1:8000/courses/ course_title="Course 1" course_phases="['Lobby Start', 'Welcome', 'Warmup', 'Lobby End']" course_phases_timed="['Welcome', 'Warmup']" course_phases_nontimed="['Lobby Start', 'Lobby End']"`
 
 Get all courses
 <br/>`http -a admin:admin GET http://127.0.0.1:8000/courses/`
@@ -169,7 +169,7 @@ Get all participations
 Update course phase of a user's current course participation
 <br/>`http -a admin:admin PUT http://127.0.0.1:8000/participations/update/1/ participation_course_id=1 participation_course_phase=1`
 <br/>`http -a admin:admin PUT http://127.0.0.1:8000/participations/update/1/ participation_course_id=1 participation_course_phase=2`
-<br/>The primary key int:pk, here "1", is the participation_id; it can be determined by getting the user's currently valid course participation, see paragraph above
+<br/>The primary key int:pk, here "1", is the participation_id; it can be determined by getting the user's currently valid course participation, see paragraph above. The participation_course_id needs to be the same course_id as the user is currently in, and the participation_course_phase shall be the new phase the user is entering.
 
 Delete participation (kick user from course)
 <br/>`http -a admin:admin DELETE http://127.0.0.1:8000/participations/admindelete/ user_id=1`
@@ -183,7 +183,7 @@ Get participation_course_phase and participation_id of own current course partic
 
 Update own current course participation
 <br/>`http -a user_2:user2_pw PUT http://127.0.0.1:8000/participations/update/2/ participation_course_id=2 participation_course_phase=1`
-<br/>The primary key int:pk, here "2", is the participation_id; it can be determined by getting the currently valid course participation, see paragraph above
+<br/>The primary key int:pk, here "2", is the participation_id; it can be determined by getting the currently valid course participation, see paragraph above. The participation_course_id needs to be the same course_id as the user is currently in, and the participation_course_phase shall be the new phase the user is entering.
 
 Exit course (delete own participation)
 <br/>`http -a user_2:user2_pw DELETE http://127.0.0.1:8000/participations/delete/`
