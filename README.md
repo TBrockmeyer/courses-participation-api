@@ -12,7 +12,7 @@ Simple web API for managing course participations, according to these rough requ
 
 ### ---------------------------------------
 
-# How to use it (if using the UI via https://course-participation-api.herokuapp.com/home/)
+# How to use it (if using the UI via the [demo App](https://course-participation-api.herokuapp.com/home/?utm_source=github&utm_medium=branch_main) hosted on Heroku.
 
 ## Login as admin
 Go to http://127.0.0.1:8000/api-auth/login/?next=/courses/ and login as admin.
